@@ -1,0 +1,2603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="LIVE Rewards">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/tiktok-icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<title>LIVE Rewards — Exchange</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=TikTokFont:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #FFFFFF;
+    --surface: #F8F8F8;
+    --surface-active: #EBEBEB;
+    --border: #F0F0F0;
+    --border-line: #E8E8E8;
+    --primary: #FE2C55;
+    --primary-hover: #E41E45;
+    --text: #161823;
+    --text-dim: #8A8B91;
+    --success: #20D588;
+    --loader-primary: #FE2C55;
+    --loader-secondary: #FF496C;
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    font-size: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body.auth-pending .phone-container { visibility:hidden; }
+  .access-time-toast { position:absolute; top:max(58px, env(safe-area-inset-top)); left:12px; z-index:480; padding:9px 12px; border-radius:12px; color:#fff; background:rgba(22,24,35,.88); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); font-size:11.5px; font-weight:600; opacity:0; transform:translateY(-8px); pointer-events:none; transition:.25s ease; }
+  .access-time-toast.show { opacity:1; transform:translateY(0); }
+
+  html, body {
+    height: 100%;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'TikTokFont', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .phone-container {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- iOS Style Dynamic Island / Notification Banner ---------- */
+  .ios-notification-banner {
+    position: absolute;
+    top: -80px;
+    left: 16px;
+    right: 16px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 12px 38px rgba(22, 24, 35, 0.16);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 12px;
+    z-index: 500;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ios-notification-banner.show {
+    transform: translateY(92px);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .ios-notification-banner.dragging { transition:none; }
+  .gift-help-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:center;padding:14px;background:rgba(22,24,35,.42);opacity:0;pointer-events:none;transition:.2s}.gift-help-overlay.open{opacity:1;pointer-events:auto}.gift-help-panel{width:min(100%,430px);padding:20px;border-radius:22px;background:#fff;transform:translateY(20px);transition:.2s}.gift-help-overlay.open .gift-help-panel{transform:none}.gift-help-head{display:flex;justify-content:space-between;align-items:center}.gift-help-head h2{margin:0;font-size:19px}.gift-close{width:30px;height:30px;border:0;border-radius:50%;background:#f1f1f2;font-size:18px}.gift-option{width:100%;display:flex;align-items:center;gap:12px;padding:13px 2px;border:0;border-bottom:1px solid var(--border-line);background:transparent;text-align:left}.gift-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:#fff0f4;font-size:27px}.gift-option b{display:block;font-size:15px}.gift-option small{display:flex;align-items:center;gap:4px;margin-top:3px;color:var(--text-dim)}.gift-option img,.gift-detail-cost img{width:15px;height:15px}.gift-detail{display:none;text-align:center}.gift-detail.visible{display:block}.gift-list.hidden{display:none}.gift-detail-icon{font-size:60px;margin:9px}.gift-detail h3{margin:0}.gift-detail-cost{display:flex;align-items:center;justify-content:center;gap:5px;margin:9px;color:var(--text-dim)}.gift-detail p{font-size:13px;color:var(--text-dim);line-height:1.5}.gift-send{width:100%;padding:13px;border:0;border-radius:12px;background:var(--primary);color:#fff;font-weight:700}.gift-back{margin-top:12px;border:0;background:none;color:var(--text-dim)}
+
+  .ios-notif-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #000;
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    overflow: hidden;
+  }
+  .ios-notif-icon img { width:100%; height:100%; object-fit:cover; }
+
+  .ios-notif-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .ios-notif-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .ios-notif-app-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: -0.2px;
+  }
+
+  .ios-notif-time {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .ios-notif-message {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------- Top Bar ---------- */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(12px, env(safe-area-inset-top)) 16px 10px;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .back-btn, .help-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .back-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--surface);
+    font-size: 0;
+    transition: background .18s ease, transform .18s ease;
+  }
+  .back-btn::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-left: 2px solid var(--text);
+    border-bottom: 2px solid var(--text);
+    transform: rotate(45deg) translate(1px,-1px);
+  }
+  .back-btn:active, .help-btn:active { transform: scale(.9); }
+
+  .help-btn {
+    width: 25px;
+    height: 25px;
+    border: 1.5px solid var(--text);
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    transition: background .18s ease, transform .18s ease;
+  }
+  .help-btn:hover, .back-btn:hover { background: var(--surface-active); }
+
+  .top-title {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px max(24px, env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ---------- Banner Box ---------- */
+  .promo-banner {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .promo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+
+  .promo-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .promo-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .promo-desc {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+
+  .promo-link {
+    font-size: 13px;
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* ---------- Tabs ---------- */
+  .rewards-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .tab-card {
+    flex: 1;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 14px 12px;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+
+  .tab-card.active {
+    background: var(--bg);
+    border-color: var(--border-line);
+  }
+
+  .tab-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .tab-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ---------- Main Balance Display ---------- */
+  .balance-display-section {
+    text-align: center;
+    padding: 6px 0 20px;
+  }
+
+  .balance-title {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .balance-amount {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .balance-approx {
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+
+  /* ---------- Action Buttons ---------- */
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  .btn:active { transform: scale(0.98); }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #FFFFFF;
+  }
+  .btn-primary:hover { background: var(--primary-hover); }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .limit-text {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+  }
+
+  /* ---------- Transactions Section ---------- */
+  .transactions-section {
+    padding: 4px 0;
+  }
+
+  .tx-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .tx-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .tx-filter {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--surface);
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+
+  .tx-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-line);
+  }
+  .tx-row:last-child { border-bottom: none; }
+
+  .tx-info h4 {
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .tx-info span {
+    font-size: 11.5px;
+    color: var(--text-dim);
+  }
+
+  .tx-amount {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .coin-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    vertical-align: middle;
+    display: inline-block;
+  }
+
+  /* ---------- Fullscreen Exchange Sheet / Modal ---------- */
+  .exchange-sheet {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+  }
+
+  .exchange-sheet.open {
+    transform: translateY(0);
+  }
+
+  .sheet-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .exchange-header-balance {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+
+  .exchange-sub-balance {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .section-label {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  /* ---------- TikTok Username Input ---------- */
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-line);
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+  }
+
+  .tiktok-handle-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 12px 28px 12px 0;
+    color: var(--text);
+    font-size: 14.5px;
+    outline: none;
+  }
+  
+  .tiktok-handle-input::placeholder {
+    color: #B0B1B6;
+  }
+
+  .clear-input-btn {
+    position: absolute;
+    right: 9px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 500;
+    color: #777980;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .clear-input-btn:hover { color: var(--text); }
+  .clear-input-btn:active { transform: scale(.9); }
+  .clear-input-btn.visible { display: flex; }
+
+  .tiktok-profile-status {
+    min-height: 18px;
+    margin: -8px 2px 10px;
+    color: var(--text-dim);
+    font-size: 11.5px;
+  }
+
+  .tiktok-profile-status.error { color: var(--primary); }
+
+  .tiktok-profile-preview {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    padding: 16px;
+    border: 1px solid var(--border-line);
+    border-radius: var(--radius-sm);
+    margin-bottom: 18px;
+  }
+
+  .tiktok-profile-preview.visible { display: flex; }
+
+  .tiktok-profile-results.two-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .tiktok-profile-results.two-results .tiktok-profile-preview { margin-bottom: 0; min-width: 0; }
+  .tiktok-profile-results.two-results .tiktok-profile-avatar { width: 48px; height: 48px; }
+  .tiktok-profile-results.two-results .tiktok-profile-name { font-size: 14px; letter-spacing: .6px; }
+  .tiktok-profile-results.two-results .tiktok-profile-handle { font-size: 12px; }
+  .tiktok-profile-results.two-results .tiktok-profile-counts { gap: 8px; font-size: 11px; flex-wrap: wrap; }
+  @media (max-width: 420px) { .tiktok-profile-results.two-results { grid-template-columns: 1fr; } }
+
+  .tiktok-profile-avatar {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--border-line);
+    flex-shrink: 0;
+  }
+
+  .tiktok-profile-copy { min-width: 0; }
+
+  .tiktok-profile-name {
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tiktok-profile-handle {
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  .tiktok-profile-counts { display:flex; gap:12px; margin-top:3px; color:var(--text-dim); font-size:13px; }
+
+  .tiktok-card-loader {
+    display: none;
+    height: 96px;
+    margin-bottom: 18px;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border-line);
+    border-radius: var(--radius-md);
+  }
+  .tiktok-card-loader.visible { display:flex; }
+  
+  /* TikTok Style Spinning Loader */
+  .tiktok-card-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid transparent;
+    border-top-color: var(--primary);
+    border-right-color: var(--primary);
+    border-radius: 50%;
+    animation: smooth-loader-spin 0.72s linear infinite;
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  @keyframes smooth-loader-spin {
+    to { transform: translateZ(0) rotate(360deg); }
+  }
+
+  .tiktok-official-embed {
+    display: none;
+    width: 100%;
+    height: 460px;
+    margin-bottom: 18px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+
+  .tiktok-official-embed.visible { display: block; }
+
+  .tiktok-default-card {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    margin-bottom: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border-line);
+    border-radius: var(--radius-md);
+  }
+
+  .tiktok-default-card.visible { display: flex; }
+
+  .tiktok-letter-avatar {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #fff;
+    background: linear-gradient(145deg, #fe2c55, #ff6684);
+    font-size: 22px;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 0 5px 14px rgba(254,44,85,.24);
+    overflow: hidden;
+  }
+  .tiktok-letter-avatar img { width:100%; height:100%; object-fit:cover; }
+  .tiktok-letter-avatar{background:#ffd633!important;color:#111!important;font-weight:800!important;font-size:24px!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+
+  .tiktok-default-info { min-width: 0; flex: 1; }
+  .tiktok-default-name { font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tiktok-default-handle { margin-top: 2px; color: var(--text-dim); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tiktok-default-stats { display: flex; gap: 14px; margin-top: 8px; font-size: 11.5px; color: var(--text-dim); }
+  .tiktok-default-stats b { color: var(--text); font-weight: 700; }
+
+  /* ---------- Preset Cards Grid ---------- */
+  .preset-cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .preset-card {
+    background: var(--bg);
+    border: 1px solid var(--border-line);
+    border-radius: var(--radius-md);
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .preset-card.selected {
+    border-color: var(--primary);
+    background: #FFF8F9;
+  }
+
+  .preset-card:focus-visible {
+    outline: 3px solid rgba(254,44,85,.18);
+    outline-offset: 2px;
+  }
+
+  .preset-coin-val {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .preset-usd-val {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* ---------- Custom Clickable Box ---------- */
+  .custom-trigger-box {
+    background: var(--surface);
+    border: 1px dashed var(--border-line);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    color: var(--text-dim);
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: background 0.15s ease;
+  }
+  .custom-trigger-box:hover {
+    background: #EFEFEF;
+  }
+
+  /* ---------- Custom Keypad Overlay / Sliding Sheet ---------- */
+  .custom-keypad-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .custom-keypad-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .custom-keypad-sheet {
+    background: var(--bg);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 16px 16px max(24px, env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 38px rgba(22,24,35,.12);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+  }
+
+  .custom-keypad-overlay.open .custom-keypad-sheet {
+    transform: translateY(0);
+  }
+
+  .custom-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .custom-sheet-title {
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    text-align: center;
+  }
+
+  .custom-sheet-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--text-dim);
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+  }
+
+  .custom-sheet-dropdown-label {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+
+  .coin-input-box-modal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg);
+    padding: 4px 0 12px;
+    border-bottom: 1px solid var(--border-line);
+    margin-bottom: 10px;
+  }
+
+  .coin-input-box-modal span.val-text {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .all-badge-text {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .conversion-row-modal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .custom-total-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 2px 12px;
+    margin-top: 2px;
+    border-top: 1px solid var(--border-line);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .custom-total-row strong { font-size: 22px; letter-spacing: -.3px; }
+
+
+  /* ---------- TikTok Custom Keypad Grid ---------- */
+  .keypad-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: var(--bg);
+    margin-bottom: 20px;
+  }
+
+  .key-btn {
+    background: #F4F4F5;
+    border: none;
+    border-radius: 10px;
+    padding: 16px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .key-btn:active { background: #E4E4E7; }
+  
+  .key-btn.backspace-key {
+    background: #F4F4F5;
+    color: var(--text-dim);
+  }
+  .key-btn.triple-zero {
+    font-size: 17px;
+  }
+
+  /* ---------- Policy Box & Footer ---------- */
+  .policy-box {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.4;
+    margin-top: auto;
+    margin-bottom: 10px;
+    background: var(--surface);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+  }
+
+  .policy-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .sheet-footer {
+    padding: 12px 16px;
+    background: var(--bg);
+    border-top: 1px solid var(--border-line);
+  }
+
+  /* ---------- Confirmation Dialog Overlay ---------- */
+  .dialog-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .dialog-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .dialog-box {
+    width: 86%;
+    max-width: 310px;
+    background: var(--bg);
+    border-radius: 20px;
+    padding: 24px 18px 16px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    transform: scale(0.95);
+    transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+  }
+
+  .dialog-overlay.open .dialog-box {
+    transform: scale(1);
+  }
+
+  .dialog-icon-container {
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 56px;
+  }
+
+  .dialog-main-coin {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+  }
+
+  .dialog-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .dialog-msg {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+
+  .dialog-actions {
+    display: flex;
+    border-top: 1px solid var(--border-line);
+    margin: 0 -18px -16px;
+  }
+
+  .dialog-btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+  }
+
+  .dialog-btn-cancel {
+    color: var(--text);
+    border-right: 1px solid var(--border-line);
+  }
+
+  .dialog-btn-confirm {
+    color: var(--primary);
+  }
+
+  /* ---------- Success Screen ---------- */
+  .success-screen {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: max(48px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .success-screen.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .success-body {
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .success-check-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--success);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 24px rgba(32,213,136,.25);
+    animation: success-circle-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transform: scale(0);
+  }
+
+  .success-screen.open .success-check-icon {
+    animation: success-circle-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes success-circle-pop {
+    0% { transform: scale(0.2); opacity: 0; box-shadow: 0 0 0 rgba(32,213,136,0); }
+    50% { transform: scale(1.15); opacity: 1; box-shadow: 0 15px 35px rgba(32,213,136,0.35); }
+    100% { transform: scale(1); opacity: 1; box-shadow: 0 10px 30px rgba(32,213,136,0.25); }
+  }
+
+  .success-check-icon svg {
+    width: 32px;
+    height: 32px;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: success-tick-draw 0.4s ease 0.25s forwards;
+  }
+
+  @keyframes success-tick-draw {
+    to { stroke-dashoffset: 0; }
+  }
+
+  .success-heading {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -.45px;
+  }
+
+  .success-subtext {
+    font-size: 15px;
+    color: var(--text-dim);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .success-subtext .coin-icon { width:17px; height:17px; }
+  .success-subtext strong { color:#667a53; font-size:17px; }
+  .success-receipt { width:100%; margin-bottom:28px; border-top:1px solid var(--border-line); border-bottom:1px solid var(--border-line); }
+  .success-receipt-row { min-height:58px; display:flex; align-items:center; justify-content:space-between; gap:18px; border-bottom:1px solid var(--border-line); font-size:15px; }
+  .success-receipt-row:last-child { border-bottom:0; }
+  .success-receipt-row span { color:#6f7077; font-weight:500; }
+  .success-receipt-row strong { color:var(--text); font-size:15.5px; font-weight:700; text-align:right; }
+
+  .success-extra { width:100%; text-align:left; }
+  .gifter-card { 
+    display: flex; 
+    align-items: center; 
+    gap: 14px; 
+    padding: 20px 8px;
+    margin-bottom: 24px;
+    background: #FFFFFF; 
+    border-top: 1px solid var(--border-line);
+    border-bottom: 1px solid var(--border-line);
+  }
+  .gifter-icon { 
+    position: relative; 
+    width: 48px; 
+    height: 48px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    flex-shrink: 0; 
+    border-radius: 12px; 
+    background: #050505;
+  }
+  .gifter-icon img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+  .gifter-level { 
+    position: absolute; 
+    right: -4px; 
+    bottom: -4px; 
+    min-width: 18px; 
+    height: 18px; 
+    padding: 0 4px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border: 2px solid #fff; 
+    border-radius: 9px; 
+    color: #fff; 
+    background: var(--primary); 
+    font-size: 9.5px; 
+    font-weight: 700; 
+  }
+  .gifter-copy h3 { margin-bottom: 3px; font-size: 16px; font-weight: 700; color: var(--text); }
+  .gifter-copy p { color: var(--text-dim); font-size: 13.5px; line-height: 1.35; }
+  .success-footer { width:100%; }
+  .success-footer .btn { min-height:56px; border-radius:28px; font-size:17px; background:#18cf24; }
+
+  .live-card { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    padding: 16px; 
+    margin-bottom: 8px; 
+    background: #FFFFFF; 
+    border: 1px solid var(--border-line); 
+    border-radius: 16px; 
+    gap: 12px;
+  }
+  .live-icon-left {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .live-card-content { flex: 1; text-align: left; min-width: 0; }
+  .live-card-content h3 { font-size: 14.5px; font-weight: 600; color: var(--text); line-height: 1.35; }
+  .live-explore-btn { 
+    padding: 8px 18px; 
+    border: 0; 
+    border-radius: 20px; 
+    color: #fff; 
+    background: var(--primary); 
+    font-size: 13.5px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    flex-shrink: 0;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .live-explore-btn:active { transform: scale(0.96); }
+  .live-explore-btn:hover { background: var(--primary-hover); }
+
+  .processing-overlay { position:absolute; inset:0; z-index:290; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.60); opacity:0; pointer-events:none; transition:opacity .2s ease; }
+  .processing-overlay.open { opacity:1; pointer-events:auto; }
+  .processing-spinner { width:60px; height:60px; border:6px solid transparent; border-top-color:var(--loader-primary); border-right-color:var(--loader-secondary); border-radius:50%; animation:smooth-processing-spin .72s linear infinite; will-change:transform; transform:translateZ(0); box-shadow:none; background:transparent; }
+  @keyframes smooth-processing-spin { to { transform:translateZ(0) rotate(360deg); } }
+  .loader-dots { display:none; align-items:center; justify-content:center; gap:8px; }
+  .loader-dots span { width:11px; height:11px; border-radius:50%; background:var(--loader-primary); animation:loader-dot .75s ease-in-out infinite alternate; }
+  .loader-dots span:nth-child(2) { background:var(--loader-secondary); animation-delay:.16s; }
+  .loader-dots span:nth-child(3) { animation-delay:.32s; }
+  body[data-loader="dots"] .tiktok-card-spinner, body[data-loader="dots"] .processing-spinner { display:none; }
+  body[data-loader="dots"] .loader-dots { display:flex; }
+  body[data-loader="pulse"] .tiktok-card-spinner, body[data-loader="pulse"] .processing-spinner { border:0; background:linear-gradient(135deg,var(--loader-primary),var(--loader-secondary)); animation:loader-pulse .85s ease-in-out infinite; }
+  @keyframes loader-dot { to { transform:translateY(-9px) scale(1.12); opacity:.55; } }
+  @keyframes loader-pulse { 50% { transform:scale(.68); opacity:.5; } }
+  .balance-flash { animation:balance-flash .8s ease; }
+  .gift-help-overlay { align-items:center; }
+  .gift-icon { overflow:hidden; background:#fff; }
+  .gift-icon img { width:100%; height:100%; object-fit:cover; }
+  .gift-detail-icon { width:116px; height:116px; margin:12px auto; overflow:hidden; border-radius:24px; background:#fff0f4; }
+  .gift-detail-icon img { width:100%; height:100%; object-fit:cover; }
+  @media (min-width: 601px) { .gift-help-overlay { align-items:flex-end; } }
+  @keyframes balance-flash { 0%,100%{color:var(--text);transform:scale(1)} 45%{color:var(--primary);transform:scale(1.045)} }
+
+  /* ---------- Exchange page: reference-matched neutral design ---------- */
+  .exchange-sheet { background:#fff; }
+  .exchange-sheet > .top-bar { position:relative; justify-content:center; min-height:58px; padding:14px 18px 11px; border:0; box-shadow:none; }
+  .exchange-sheet > .top-bar .back-btn { position:absolute; left:18px; background:transparent; }
+  .exchange-sheet > .top-bar .top-title { font-size:19px; font-weight:750; }
+  .exchange-sheet #giftHelpBtn { display:none; }
+  .exchange-sheet .sheet-body { padding:12px 20px 28px; }
+  .balance-kicker { margin:4px 0 5px; color:#7b8290; text-align:center; font-size:15px; font-weight:500; }
+  .exchange-header-balance { margin:0; font-size:clamp(31px,9.4vw,44px); font-weight:760; letter-spacing:-1.6px; line-height:1.08; }
+  .exchange-sub-balance { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:4px; margin:11px 0 5px; color:#777f8d; font-size:12.5px; }
+  .balance-helper { margin-bottom:26px; color:#777f8d; text-align:center; font-size:14px; }
+
+  .exchange-sheet .section-label { display:block; margin:0 0 10px; color:#161823; font-size:16px; font-weight:750; letter-spacing:0; }
+  .input-wrapper { min-height:64px; margin:0 0 8px; padding:0 44px 0 18px; border:1.5px solid transparent; border-radius:19px; background:#f3f6fa; box-shadow:none; transition:border-color .18s ease,box-shadow .18s ease,background .18s ease; }
+  .input-wrapper::before { content:'@'; flex:0 0 auto; margin-right:12px; color:#717986; font-size:21px; font-weight:500; }
+  .input-wrapper:focus-within { border-color:#fe2c55; background:#fff; box-shadow:0 0 0 3px rgba(254,44,85,.10); }
+  .tiktok-handle-input { padding:20px 0; color:#161823; font-size:17px; font-weight:700; }
+  .tiktok-handle-input::placeholder { color:#fe2c55; font-size:14px; font-weight:600; opacity:.76; }
+  .tiktok-handle-input:focus::placeholder { color:#fe2c55; opacity:.58; }
+  .clear-input-btn { right:14px; width:27px; height:27px; border-radius:50%; background:#e7eaf0; color:#6f7682; font-size:12px; }
+  .tiktok-profile-status { min-height:0; margin:0 3px 8px; color:#7b8290; font-size:11.5px; }
+  .tiktok-profile-status:empty { display:none; }
+
+  .tiktok-card-loader,.tiktok-profile-preview,.tiktok-default-card { min-height:82px; margin:10px 0 16px; padding:13px 16px; border:1px solid #e0e4ea; border-radius:19px; background:#fff; box-shadow:0 12px 24px rgba(30,37,50,.10); }
+  .tiktok-profile-preview::after,.tiktok-default-card::after { content:none; }
+  .tiktok-profile-avatar,.tiktok-letter-avatar { width:58px; height:58px; border:0; box-shadow:none; }
+  .tiktok-profile-name,.tiktok-default-name { padding:0; color:#161823; font-size:17px; font-weight:750; letter-spacing:0; }
+  .tiktok-profile-handle,.tiktok-default-handle { margin-top:4px; color:#747c89; font-size:14px; }
+  .tiktok-profile-counts,.tiktok-default-stats { margin-top:4px; color:#747c89; font-size:12px; font-weight:500; }
+  .tiktok-profile-results.two-results { gap:8px; margin-bottom:16px; }
+
+  .exchange-amount-label { margin-top:4px !important; }
+  .preset-cards-container { gap:8px; margin-bottom:16px; }
+  .preset-card { min-height:92px; padding:16px 6px; border:1px solid #dfe3e9; border-radius:18px; background:#fff; box-shadow:none; transition:border-color .15s ease,background .15s ease,transform .15s ease; }
+  .preset-card:hover { transform:none; border-color:#b7bdc7; }
+  .preset-card:active { transform:scale(.98); }
+  .preset-card.selected { border-color:#fe2c55; background:#fff4f6; box-shadow:0 0 0 2px rgba(254,44,85,.08); }
+  .preset-coin-val { margin-bottom:6px; font-size:16px; }
+  .preset-usd-val { color:#727a87; font-size:14px; }
+
+  .custom-trigger-box { min-height:62px; display:flex; align-items:center; margin:0 0 20px; padding:0 18px; border:0; border-radius:19px; background:#f3f6fa; color:#737c89; font-size:15px; font-weight:500; }
+  .custom-trigger-box::after { content:none; }
+  .custom-trigger-box:hover,.custom-trigger-box:focus-visible { border:0; background:#edf1f6; color:#4f5661; box-shadow:none; outline:none; }
+  .policy-box { margin:0 0 18px; padding:18px; border:0; border-radius:19px; background:#f3f6fa; color:#747d8a; font-size:12.5px; line-height:1.55; }
+  .policy-top { display:block; margin:0; color:#747d8a; font-weight:400; }
+  .policy-top b { color:#161823; font-weight:750; }
+
+  .sheet-footer { padding:11px 20px max(12px,env(safe-area-inset-bottom)); border-top:1px solid #eef0f3; background:rgba(255,255,255,.96); box-shadow:none; }
+  .sheet-footer .btn-primary { min-height:50px; border-radius:14px; background:#fe2c55; box-shadow:0 9px 20px rgba(254,44,85,.20); font-size:15.5px; }
+  .sheet-footer .btn-primary:hover { background:#e8244c; }
+  .sheet-footer .btn-primary:active { transform:scale(.985); box-shadow:none; }
+  @media (min-width:640px) { .phone-container { max-width:480px; max-height:900px; border-radius:28px; box-shadow:0 24px 80px rgba(22,24,35,.15); } .exchange-sheet { border-radius:28px; } }
+  @media (max-width:360px) { .exchange-sheet .sheet-body { padding-left:15px; padding-right:15px; } .exchange-header-balance { font-size:30px; } .preset-card { padding-left:3px; padding-right:3px; } .preset-coin-val { font-size:13.5px; } }
+
+  /* Toolbox-driven UI options */
+  .app-settings-btn{width:34px;height:34px;border:1px solid #e0e3e8!important;background:#fff!important;color:#4d535c!important;border-radius:10px!important;display:grid!important;place-items:center!important;padding:0!important}
+  .app-settings-btn svg{width:18px;height:18px}.app-settings-btn:hover{background:#f5f6f8!important}
+  body{--search-loader-color:#fe2c55;--payment-loader-color:#fe2c55;--username-border-color:#fe2c55}
+  .input-wrapper{border:1px solid transparent!important;box-shadow:none!important;transition:border-color .16s ease,box-shadow .16s ease;background:var(--surface)}
+  .input-wrapper:focus-within{border-color:var(--username-border-color)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--username-border-color) 14%,transparent)!important}
+  body[data-username-border="none"] .input-wrapper,body[data-username-border="none"] .input-wrapper:focus-within{border-color:transparent!important;box-shadow:none!important}
+  .tiktok-handle-input:focus{outline:none!important}
+  .tiktok-handle-input::placeholder{transition:color .16s ease,opacity .16s ease}
+  .tiktok-card-spinner,.processing-spinner{position:relative;display:block}
+  .tiktok-card-spinner i,.processing-spinner i{display:none}
+  body[data-search-loader="modern"] .tiktok-card-spinner{border-color:transparent!important;border-top-color:var(--search-loader-color)!important;border-right-color:var(--search-loader-color)!important;box-shadow:0 0 0 2px rgba(0,0,0,.04)}
+  body[data-search-loader="ring"] .tiktok-card-spinner{border-color:#e7e8eb!important;border-top-color:var(--search-loader-color)!important}
+  body[data-search-loader="classic"] .tiktok-card-spinner{border-color:transparent!important;border-top-color:var(--search-loader-color)!important;border-right-color:var(--search-loader-color)!important}
+  body[data-search-loader="dots"] .tiktok-card-spinner{width:auto;height:auto;border:0!important;border-radius:0;display:flex;gap:7px;animation:none}
+  body[data-search-loader="dots"] .tiktok-card-spinner i{display:block;width:9px;height:9px;border-radius:50%;background:var(--search-loader-color);animation:toolbox-dot .7s ease-in-out infinite alternate}
+  body[data-search-loader="dots"] .tiktok-card-spinner i:nth-child(2){animation-delay:.14s}body[data-search-loader="dots"] .tiktok-card-spinner i:nth-child(3){animation-delay:.28s}
+  body[data-search-loader="squares"] .tiktok-card-spinner{width:34px;height:34px;border:0!important;border-radius:0;display:grid;grid-template-columns:1fr 1fr;gap:4px;animation:smooth-loader-spin 1s linear infinite}
+  body[data-search-loader="squares"] .tiktok-card-spinner i{display:block;background:var(--search-loader-color);border-radius:3px}
+  body[data-payment-loader="modern"] .processing-spinner{border-color:transparent!important;border-top-color:var(--payment-loader-color)!important;border-right-color:var(--payment-loader-color)!important;box-shadow:0 0 0 2px rgba(0,0,0,.04)}
+  body[data-payment-loader="ring"] .processing-spinner{border-color:#e7e8eb!important;border-top-color:var(--payment-loader-color)!important}
+  body[data-payment-loader="classic"] .processing-spinner{border-color:transparent!important;border-top-color:var(--payment-loader-color)!important;border-right-color:var(--payment-loader-color)!important}
+  body[data-payment-loader="dots"] .processing-spinner{width:auto;height:auto;border:0!important;border-radius:0;display:flex;gap:9px;animation:none}
+  body[data-payment-loader="dots"] .processing-spinner i{display:block;width:12px;height:12px;border-radius:50%;background:var(--payment-loader-color);animation:toolbox-dot .7s ease-in-out infinite alternate}
+  body[data-payment-loader="dots"] .processing-spinner i:nth-child(2){animation-delay:.14s}body[data-payment-loader="dots"] .processing-spinner i:nth-child(3){animation-delay:.28s}
+  body[data-payment-loader="squares"] .processing-spinner{width:46px;height:46px;border:0!important;border-radius:0;display:grid;grid-template-columns:1fr 1fr;gap:5px;animation:smooth-processing-spin 1s linear infinite}
+  body[data-payment-loader="squares"] .processing-spinner i{display:block;background:var(--payment-loader-color);border-radius:4px}
+  @keyframes toolbox-dot{to{transform:translateY(-8px);opacity:.45}}
+  body[data-search-loader="classicv2"] .tiktok-card-spinner{width:58px!important;height:24px!important;border:0!important;border-radius:0!important;background:transparent!important;animation:none!important;position:relative!important}
+  body[data-search-loader="classicv2"] .tiktok-card-spinner i{display:block!important;position:absolute;top:5px;width:14px;height:14px;border-radius:50%;animation:classic-v2-load 1.05s cubic-bezier(.4,0,.2,1) infinite}
+  body[data-search-loader="classicv2"] .tiktok-card-spinner i:nth-child(1){left:8px;background:#fe2c55}body[data-search-loader="classicv2"] .tiktok-card-spinner i:nth-child(2){right:8px;background:#ff496c;animation-delay:-.525s}body[data-search-loader="classicv2"] .tiktok-card-spinner i:nth-child(n+3){display:none!important}
+  body[data-payment-loader="classicv2"] .processing-spinner{width:70px!important;height:28px!important;border:0!important;border-radius:0!important;background:transparent!important;animation:none!important;position:relative!important}
+  body[data-payment-loader="classicv2"] .processing-spinner i{display:block!important;position:absolute;top:5px;width:18px;height:18px;border-radius:50%;animation:classic-v2-payment 1.05s cubic-bezier(.4,0,.2,1) infinite}
+  body[data-payment-loader="classicv2"] .processing-spinner i:nth-child(1){left:8px;background:#fe2c55}body[data-payment-loader="classicv2"] .processing-spinner i:nth-child(2){right:8px;background:#ff496c;animation-delay:-.525s}body[data-payment-loader="classicv2"] .processing-spinner i:nth-child(n+3){display:none!important}
+  @keyframes classic-v2-load{0%,100%{transform:translateX(0) scale(.86);opacity:.62}50%{transform:translateX(27px) scale(1);opacity:1}}
+  @keyframes classic-v2-payment{0%,100%{transform:translateX(0) scale(.86);opacity:.62}50%{transform:translateX(34px) scale(1);opacity:1}}
+
+
+
+
+  /* ===== Mode 3 home: screenshot-matched LIVE Rewards ===== */
+  #mainHomeView { background:#f5f5f5; padding:22px 24px max(34px,env(safe-area-inset-bottom)); }
+  .phone-container > .top-bar { min-height:100px; padding:max(22px,env(safe-area-inset-top)) 54px 18px; }
+  .phone-container > .top-bar .top-title { font-size:32px; font-weight:800; letter-spacing:-1px; }
+  .phone-container > .top-bar .back-btn { width:30px; height:38px; background:transparent; border-radius:0; }
+  .phone-container > .top-bar .back-btn::before { width:14px; height:14px; border-left-width:4px; border-bottom-width:4px; }
+  .phone-container > .top-bar .help-btn { width:34px; height:34px; border:0; border-radius:0; background:transparent; position:relative; font-size:0; }
+  .phone-container > .top-bar .help-btn svg { display:none; }
+  .phone-container > .top-bar .help-btn::before,.phone-container > .top-bar .help-btn::after { content:''; position:absolute; left:16px; top:3px; width:3px; height:29px; background:#111; border-radius:3px; }
+  .phone-container > .top-bar .help-btn::before { transform:rotate(45deg); }
+  .phone-container > .top-bar .help-btn::after { transform:rotate(-45deg); }
+
+  #mainHomeView .promo-banner { background:#fff; border-radius:24px; padding:31px 31px 32px; margin:0 0 24px; min-height:221px; }
+  #mainHomeView .promo-header { margin-bottom:12px; }
+  #mainHomeView .promo-title { font-size:28px; line-height:1.18; font-weight:800; letter-spacing:-.7px; }
+  #mainHomeView .promo-close { font-size:0; width:28px; height:28px; position:relative; flex:0 0 28px; }
+  #mainHomeView .promo-close::before,#mainHomeView .promo-close::after { content:''; position:absolute; left:13px; top:3px; width:2.5px; height:22px; background:#aeb6c4; border-radius:2px; }
+  #mainHomeView .promo-close::before { transform:rotate(45deg); } #mainHomeView .promo-close::after { transform:rotate(-45deg); }
+  #mainHomeView .promo-desc { max-width:680px; font-size:23px; line-height:1.36; color:#747c8c; margin-bottom:18px; letter-spacing:.1px; }
+  #mainHomeView .promo-link { font-size:21px; font-weight:700; color:#ff3b49; }
+
+  #mainHomeView .rewards-tabs { gap:16px; margin-bottom:32px; }
+  #mainHomeView .tab-card { min-height:128px; border-radius:22px; padding:26px 18px 20px; text-align:center; background:#f1f1f1; display:flex; flex-direction:column; justify-content:center; }
+  #mainHomeView .tab-card.active { background:#fff; border:2px solid #dedede; box-shadow:0 3px 8px rgba(0,0,0,.12); }
+  #mainHomeView .tab-label { font-size:22px; line-height:1.2; color:#6d6d73; font-weight:500; margin-bottom:13px; }
+  #mainHomeView .tab-card.active .tab-label { color:#111; font-weight:700; }
+  #mainHomeView .tab-card:not(.active) .tab-label::after { content:''; display:inline-block; width:14px; height:14px; margin-left:8px; border-radius:50%; background:#f13d46; vertical-align:1px; }
+  #mainHomeView .tab-value { font-size:26px; font-weight:800; letter-spacing:.1px; }
+
+  #mainHomeView .balance-display-section { padding:0 0 30px; }
+  #mainHomeView .balance-title { font-size:25px; color:#747c8c; margin-bottom:12px; font-weight:500; }
+  #mainHomeView .balance-amount { font-size:0; line-height:1; margin-bottom:21px; white-space:nowrap; }
+  #mainHomeView .balance-amount::before { content:'USD '; font-size:34px; font-weight:600; color:#747c8c; vertical-align:baseline; }
+  #mainHomeView .balance-amount::after { content:attr(data-display-amount); font-size:70px; font-weight:900; color:#000; letter-spacing:-3px; }
+  #mainHomeView .balance-approx { font-size:26px; color:#747c8c; }
+  #mainHomeView .balance-approx .coin-icon,#mainHomeView .balance-approx #homeCoinBalance { display:none; }
+  #mainHomeView .balance-approx::after { content:'  ⓘ'; color:#bcc4d0; font-size:25px; }
+
+  #mainHomeView .action-buttons { gap:22px; margin-bottom:31px; }
+  #mainHomeView .btn { min-height:108px; border-radius:54px; font-size:29px; font-weight:800; }
+  #mainHomeView .btn-primary { background:linear-gradient(100deg,#ff4867,#f22e4c); box-shadow:0 15px 25px rgba(242,46,76,.18); }
+  #mainHomeView .btn-secondary { background:#e6e7eb; color:#1f2735; }
+  #mainHomeView .limit-text { display:flex; justify-content:space-between; align-items:center; text-align:left; font-size:22px; color:#747c8c; margin:0 8px 32px; }
+  #mainHomeView .limit-text::after { content:'$1000/$1000'; color:#080808; font-size:22px; font-weight:800; }
+
+  #mainHomeView .transactions-section { background:#fff; border-radius:23px; padding:36px 31px 32px; }
+  #mainHomeView .tx-header { display:block; margin-bottom:36px; }
+  #mainHomeView .tx-title { font-size:31px; font-weight:900; margin-bottom:31px; }
+  #mainHomeView .tx-filter { display:flex; justify-content:space-between; width:100%; background:transparent; padding:0; border-radius:0; font-size:0; color:#111; }
+  #mainHomeView .tx-filter::before { content:'Jun 2026 ⌄'; font-size:25px; font-weight:800; }
+  #mainHomeView .tx-filter::after { content:'in: USD0.46'; font-size:22px; font-weight:500; color:#697181; }
+  #mainHomeView .tx-row { padding:0; border:0; display:block; }
+  #mainHomeView .tx-row + .tx-row { display:none; }
+  #mainHomeView .tx-info h4 { font-size:25px; font-weight:800; margin-bottom:10px; line-height:1.25; }
+  #mainHomeView .tx-info span { font-size:22px; color:#a1a1a5; }
+  #mainHomeView .tx-amount { display:none; }
+
+  @media (max-width:600px) {
+    .phone-container > .top-bar { min-height:66px; padding:max(12px,env(safe-area-inset-top)) 22px 10px; }
+    .phone-container > .top-bar .top-title { font-size:22px; }
+    #mainHomeView { padding:14px 14px max(24px,env(safe-area-inset-bottom)); }
+    #mainHomeView .promo-banner { min-height:auto; border-radius:18px; padding:20px 18px 21px; margin-bottom:14px; }
+    #mainHomeView .promo-title { font-size:19px; } #mainHomeView .promo-desc { font-size:16px; } #mainHomeView .promo-link { font-size:15px; }
+    #mainHomeView .rewards-tabs { gap:10px; margin-bottom:20px; } #mainHomeView .tab-card { min-height:84px; border-radius:15px; padding:14px 8px; }
+    #mainHomeView .tab-label { font-size:14px; margin-bottom:8px; } #mainHomeView .tab-value { font-size:17px; }
+    #mainHomeView .tab-card:not(.active) .tab-label::after { width:9px; height:9px; margin-left:5px; }
+    #mainHomeView .balance-title { font-size:17px; } #mainHomeView .balance-amount::before { font-size:23px; } #mainHomeView .balance-amount::after { font-size:46px; letter-spacing:-2px; }
+    #mainHomeView .balance-approx { font-size:17px; } #mainHomeView .btn { min-height:70px; border-radius:36px; font-size:20px; } #mainHomeView .action-buttons { gap:14px; margin-bottom:22px; }
+    #mainHomeView .limit-text,#mainHomeView .limit-text::after { font-size:14px; } #mainHomeView .limit-text { margin:0 5px 22px; }
+    #mainHomeView .transactions-section { border-radius:17px; padding:23px 20px 22px; } #mainHomeView .tx-title { font-size:21px; margin-bottom:20px; }
+    #mainHomeView .tx-header { margin-bottom:23px; } #mainHomeView .tx-filter::before { font-size:17px; } #mainHomeView .tx-filter::after { font-size:15px; }
+    #mainHomeView .tx-info h4 { font-size:17px; } #mainHomeView .tx-info span { font-size:15px; }
+  }
+
+  /* Compact responsive sizing for real phones */
+  @media (max-width:600px) {
+    html,body{width:100%;min-width:0;overflow:hidden;}
+    .phone-container{width:100vw;max-width:100vw;height:100dvh;max-height:none;border-radius:0;box-shadow:none;}
+    .phone-container > .top-bar{min-height:58px;padding:max(8px,env(safe-area-inset-top)) 18px 8px;}
+    .phone-container > .top-bar .top-title{font-size:19px;letter-spacing:-.35px;}
+    .phone-container > .top-bar .back-btn{transform:scale(.82);transform-origin:left center;}
+    .phone-container > .top-bar .help-btn{transform:scale(.78);transform-origin:right center;}
+    #mainHomeView{padding:11px 12px max(20px,env(safe-area-inset-bottom));}
+    #mainHomeView .promo-banner{padding:16px 15px 17px;border-radius:16px;margin-bottom:12px;}
+    #mainHomeView .promo-title{font-size:17px;line-height:1.2;letter-spacing:-.25px;}
+    #mainHomeView .promo-desc{font-size:14px;line-height:1.4;margin:8px 0 12px;}
+    #mainHomeView .promo-link{font-size:14px;}
+    #mainHomeView .promo-close{transform:scale(.75);transform-origin:top right;}
+    #mainHomeView .rewards-tabs{gap:8px;margin-bottom:17px;}
+    #mainHomeView .tab-card{min-height:72px;border-radius:14px;padding:11px 5px 10px;}
+    #mainHomeView .tab-label{font-size:12.5px;margin-bottom:6px;white-space:nowrap;}
+    #mainHomeView .tab-value{font-size:15px;}
+    #mainHomeView .balance-display-section{padding-bottom:20px;}
+    #mainHomeView .balance-title{font-size:15px;margin-bottom:8px;}
+    #mainHomeView .balance-amount{margin-bottom:13px;}
+    #mainHomeView .balance-amount::before{font-size:19px;}
+    #mainHomeView .balance-amount::after{font-size:clamp(34px,10.6vw,42px);letter-spacing:-1.7px;}
+    #mainHomeView .balance-approx{font-size:15px;}
+    #mainHomeView .balance-approx::after{font-size:15px;}
+    #mainHomeView .action-buttons{gap:10px;margin-bottom:17px;}
+    #mainHomeView .btn{min-height:57px;border-radius:30px;font-size:17px;}
+    #mainHomeView .limit-text,#mainHomeView .limit-text::after{font-size:12.5px;}
+    #mainHomeView .limit-text{margin:0 4px 18px;gap:8px;}
+    #mainHomeView .transactions-section{border-radius:15px;padding:18px 16px 18px;}
+    #mainHomeView .tx-title{font-size:19px;margin-bottom:16px;}
+    #mainHomeView .tx-header{margin-bottom:18px;}
+    #mainHomeView .tx-filter::before{font-size:15px;}
+    #mainHomeView .tx-filter::after{font-size:13px;}
+    #mainHomeView .tx-info h4{font-size:15px;margin-bottom:7px;}
+    #mainHomeView .tx-info span{font-size:13px;}
+  }
+  @media (max-width:360px) {
+    #mainHomeView{padding-left:10px;padding-right:10px;}
+    #mainHomeView .tab-label{font-size:11.5px;}
+    #mainHomeView .tab-value{font-size:13.5px;}
+    #mainHomeView .balance-amount::before{font-size:17px;}
+    #mainHomeView .balance-amount::after{font-size:33px;letter-spacing:-1.4px;}
+    #mainHomeView .limit-text,#mainHomeView .limit-text::after{font-size:11.5px;}
+  }
+
+
+
+  /* Mode 3 home: lighter, smaller TikTok-like typography */
+  #mainHomeView { padding-top: 12px; }
+  #mainHomeView .promo-banner { padding: 14px 15px; margin-bottom: 13px; }
+  #mainHomeView .promo-title { font-size: 13.5px; font-weight: 600; }
+  #mainHomeView .promo-desc { font-size: 11.8px; font-weight: 400; line-height: 1.42; }
+  #mainHomeView .promo-link { font-size: 12px; font-weight: 500; }
+  #mainHomeView .tab-card { padding: 12px 9px; }
+  #mainHomeView .tab-label { font-size: 11.3px; font-weight: 400; }
+  #mainHomeView .tab-value { font-size: 13px; font-weight: 600; }
+  #mainHomeView .balance-display-section { padding: 3px 0 16px; }
+  #mainHomeView .balance-title { font-size: 12px; font-weight: 400; margin-bottom: 5px; }
+  #mainHomeView .balance-amount { font-size: 30px; font-weight: 650; letter-spacing: -0.7px; }
+  #mainHomeView .balance-approx { font-size: 11.5px; font-weight: 400; }
+  #mainHomeView .btn { padding: 12px; font-size: 14px; font-weight: 600; }
+  #mainHomeView .limit-text { font-size: 10.8px; font-weight: 400; margin-bottom: 20px; }
+  #mainHomeView .tx-title { font-size: 13px; font-weight: 600; }
+  #mainHomeView .tx-filter { font-size: 11px; font-weight: 400; }
+  #mainHomeView .tx-info h4 { font-size: 12.5px; font-weight: 500; }
+  #mainHomeView .tx-info span { font-size: 10.8px; font-weight: 400; }
+  #mainHomeView .tx-amount { font-size: 12.5px; font-weight: 500; }
+  .phone-container > .top-bar .top-title { font-size: 17px; font-weight: 600; }
+  @media (max-width: 390px) {
+    #mainHomeView .balance-amount { font-size: 27px; }
+    #mainHomeView .promo-title { font-size: 13px; }
+    #mainHomeView .tab-value { font-size: 12.3px; }
+    #mainHomeView .btn { font-size: 13.5px; }
+  }
+
+
+
+/* ===== FINAL MODE 3 HOME — matched to tt_ex LIVE rewards first page ===== */
+@media (max-width:600px){
+  .phone-container>.top-bar{min-height:58px;padding:max(9px,env(safe-area-inset-top)) 17px 9px;background:#fff;border-bottom:0;}
+  .phone-container>.top-bar .top-title{font-size:18px!important;font-weight:650!important;letter-spacing:-.25px!important;color:#0f0f10;}
+  .phone-container>.top-bar .back-btn{width:28px;height:34px;transform:none!important;}
+  .phone-container>.top-bar .back-btn::before{width:10px;height:10px;border-left-width:2.5px;border-bottom-width:2.5px;}
+  .phone-container>.top-bar .help-btn{width:28px;height:30px;transform:none!important;}
+  .phone-container>.top-bar .help-btn::before,.phone-container>.top-bar .help-btn::after{left:13px;top:5px;width:2px;height:21px;background:#111;}
+
+  #mainHomeView{background:#f5f5f5;padding:11px 12px max(24px,env(safe-area-inset-bottom))!important;}
+  #mainHomeView .promo-banner{min-height:0!important;padding:17px 16px 18px!important;margin:0 0 12px!important;border-radius:15px!important;background:#fff;}
+  #mainHomeView .promo-header{margin-bottom:7px!important;align-items:flex-start;}
+  #mainHomeView .promo-title{font-size:15.5px!important;line-height:1.25!important;font-weight:650!important;letter-spacing:-.18px!important;color:#111;}
+  #mainHomeView .promo-desc{font-size:13px!important;line-height:1.42!important;font-weight:400!important;color:#747b89!important;margin:0 20px 10px 0!important;letter-spacing:0!important;}
+  #mainHomeView .promo-link{font-size:13px!important;font-weight:550!important;color:#fe3b4f!important;}
+  #mainHomeView .promo-close{width:22px;height:22px;transform:none!important;}
+  #mainHomeView .promo-close::before,#mainHomeView .promo-close::after{left:10px;top:3px;width:1.7px;height:17px;}
+
+  #mainHomeView .rewards-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px!important;margin:0 0 17px!important;}
+  #mainHomeView .tab-card{min-height:66px!important;padding:11px 5px 10px!important;border-radius:13px!important;background:#f0f0f0;}
+  #mainHomeView .tab-card.active{background:#fff;border:1px solid #dedede;box-shadow:0 2px 5px rgba(0,0,0,.10);}
+  #mainHomeView .tab-label{font-size:12.2px!important;line-height:1.2!important;font-weight:400!important;color:#6d7078!important;margin-bottom:6px!important;white-space:nowrap;}
+  #mainHomeView .tab-card.active .tab-label{font-weight:550!important;color:#111!important;}
+  #mainHomeView .tab-value{font-size:14px!important;line-height:1.15!important;font-weight:650!important;letter-spacing:0!important;color:#111;}
+  #mainHomeView .tab-card:not(.active) .tab-label::after{width:7px;height:7px;margin-left:4px;vertical-align:1px;}
+
+  #mainHomeView .balance-display-section{padding:0 0 17px!important;text-align:center;}
+  #mainHomeView .balance-title{font-size:13.5px!important;line-height:1.2!important;font-weight:400!important;color:#747b89!important;margin:0 0 7px!important;}
+  #mainHomeView .balance-amount{font-size:0!important;line-height:1!important;margin:0 0 10px!important;white-space:nowrap;}
+  #mainHomeView .balance-amount::before{content:'USD ';font-size:19px!important;font-weight:500!important;color:#737a88;letter-spacing:0;}
+  #mainHomeView .balance-amount::after{font-size:clamp(35px,10.5vw,42px)!important;font-weight:750!important;letter-spacing:-1.6px!important;color:#000;}
+  #mainHomeView .balance-approx{font-size:13.5px!important;line-height:1.2!important;font-weight:400!important;color:#747b89!important;}
+  #mainHomeView .balance-approx::after{font-size:13px!important;color:#b7bec9;}
+
+  #mainHomeView .action-buttons{display:flex;flex-direction:column;gap:10px!important;margin:0 0 16px!important;}
+  #mainHomeView .btn{width:100%;min-height:54px!important;padding:0 18px!important;border-radius:28px!important;font-size:16px!important;line-height:1!important;font-weight:650!important;}
+  #mainHomeView .btn-primary{background:linear-gradient(100deg,#ff4867,#f43150);box-shadow:0 8px 16px rgba(244,49,80,.15);}
+  #mainHomeView .btn-secondary{background:#e7e8ec;color:#202735;}
+  #mainHomeView .limit-text{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 4px 17px!important;font-size:12px!important;line-height:1.2!important;font-weight:400!important;color:#747b89;white-space:nowrap;}
+  #mainHomeView .limit-text::after{font-size:12.5px!important;font-weight:650!important;color:#111;white-space:nowrap;}
+
+  #mainHomeView .transactions-section{background:#fff;border-radius:14px!important;padding:18px 16px 19px!important;}
+  #mainHomeView .tx-header{display:block!important;margin:0 0 20px!important;}
+  #mainHomeView .tx-title{font-size:18px!important;line-height:1.2!important;font-weight:650!important;margin:0 0 20px!important;color:#111;}
+  #mainHomeView .tx-filter{display:flex!important;justify-content:space-between!important;align-items:center;width:100%;font-size:0!important;}
+  #mainHomeView .tx-filter::before{content:'Jun 2026 ⌄';font-size:14.5px!important;font-weight:600!important;color:#111;}
+  #mainHomeView .tx-filter::after{content:'in: USD0.46';font-size:12.5px!important;font-weight:400!important;color:#697181;}
+  #mainHomeView .tx-row{display:block!important;padding:0!important;border:0!important;}
+  #mainHomeView .tx-row+.tx-row{display:none!important;}
+  #mainHomeView .tx-info h4{font-size:14.5px!important;line-height:1.28!important;font-weight:550!important;margin:0 0 6px!important;color:#111;}
+  #mainHomeView .tx-info span{font-size:12.5px!important;font-weight:400!important;color:#9b9da2!important;}
+  #mainHomeView .tx-amount{display:none!important;}
+}
+@media (max-width:360px){
+  #mainHomeView{padding-left:10px!important;padding-right:10px!important;}
+  #mainHomeView .promo-title{font-size:14.5px!important;}
+  #mainHomeView .promo-desc{font-size:12.2px!important;}
+  #mainHomeView .tab-label{font-size:11.3px!important;}
+  #mainHomeView .tab-value{font-size:12.7px!important;}
+  #mainHomeView .balance-amount::before{font-size:17px!important;}
+  #mainHomeView .balance-amount::after{font-size:33px!important;}
+  #mainHomeView .limit-text{font-size:11px!important;}
+  #mainHomeView .limit-text::after{font-size:11.5px!important;}
+}
+
+
+/* Advanced video-matched loaders: profile skeleton + in-button completion spinner */
+body[data-search-loader="advanced"] .tiktok-card-loader{position:relative;overflow:hidden;display:none!important;min-height:84px!important;background:#f3f3f4!important}
+body[data-search-loader="advanced"] .tiktok-card-loader.visible{display:block!important}
+body[data-search-loader="advanced"] .tiktok-card-loader .tiktok-card-spinner,body[data-search-loader="advanced"] .tiktok-card-loader .loader-dots{display:none!important}
+body[data-search-loader="advanced"] .tiktok-card-loader:before{content:"";position:absolute;left:14px;top:13px;width:54px;height:54px;border-radius:50%;background:#d9dade}
+body[data-search-loader="advanced"] .tiktok-card-loader:after{content:"";position:absolute;left:82px;right:18px;top:22px;height:12px;border-radius:7px;background:linear-gradient(90deg,#dedfe2 15%,#f5f5f6 38%,#dedfe2 62%);background-size:240% 100%;box-shadow:0 22px 0 -2px #e2e3e5;animation:advanced-card-shimmer 1.05s linear infinite}
+@keyframes advanced-card-shimmer{to{background-position:-240% 0}}
+body[data-payment-loader="advanced"] .processing-overlay{display:none!important}
+body[data-payment-loader="advanced"] #finalExchangeBtn.advanced-loading{color:transparent!important;pointer-events:none;position:relative}
+body[data-payment-loader="advanced"] #finalExchangeBtn.advanced-loading:after{content:"";position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-8px;border:2px solid rgba(254,44,85,.25);border-top-color:#fe2c55;border-radius:50%;animation:advanced-btn-spin .65s linear infinite}
+@keyframes advanced-btn-spin{to{transform:rotate(360deg)}}
+
+  /* First-page Exchange loading, controlled by Toolbox */
+  #openExchangeBtn.exchange-opening{position:relative!important;color:transparent!important;pointer-events:none!important}
+  #openExchangeBtn.exchange-opening:after{content:"";position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-11px 0 0 -11px;border:3px solid rgba(255,255,255,.42);border-top-color:#fff;border-radius:50%;animation:first-exchange-spin .65s linear infinite;box-sizing:content-box}
+  @keyframes first-exchange-spin{to{transform:rotate(360deg)}}
+</style>
+<style id="mode3-exchange-match-mode2">
+/* Mode 3 second page copied from Mode 2 exchange screen – compact mobile reference match */
+.exchange-sheet{background:#fff!important}
+.exchange-sheet>.top-bar{height:58px!important;min-height:58px!important;padding:8px 18px!important;border-bottom:0!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.exchange-sheet>.top-bar .back-btn{left:18px!important;top:50%!important;transform:translateY(-50%)!important;width:34px!important;height:34px!important;font-size:0!important}
+.exchange-sheet>.top-bar .back-btn:before{content:'←';font-size:31px;line-height:1;font-weight:400;color:#161823}
+.exchange-sheet>.top-bar .top-title{font-size:20px!important;font-weight:750!important}
+.exchange-sheet #giftHelpBtn{display:flex!important;position:absolute!important;right:18px!important;top:50%!important;transform:translateY(-50%)!important;width:27px!important;height:27px!important;border:2px solid #161823!important;border-radius:50%!important;background:#fff!important;color:#161823!important;font-size:17px!important;font-weight:750!important}
+.exchange-sheet .sheet-body{padding:10px 18px 18px!important}
+.balance-kicker{display:none!important}
+.exchange-header-balance{font-size:38px!important;line-height:1.08!important;margin:24px 0 0!important;letter-spacing:-1.4px!important}
+.exchange-sub-balance{font-size:15px!important;margin:15px 0 0!important;color:#8a8a8f!important}
+.exchange-sub-balance .coin-icon{width:19px!important;height:19px!important}
+.balance-helper{font-size:14px!important;margin:19px 0 34px!important;color:#8a8a8f!important}
+.exchange-sheet .section-label{font-size:16px!important;margin:0 0 10px!important;font-weight:700!important}
+.input-wrapper{height:58px!important;min-height:58px!important;margin:0 0 10px!important;padding:0 42px 0 18px!important;border:1.5px solid transparent!important;border-radius:10px!important;background:#f5f5f5!important}
+.input-wrapper:before{display:none!important}
+.input-wrapper:focus-within{border-color:#fe2c55!important;background:#f5f5f5!important;box-shadow:0 0 0 1px rgba(254,44,85,.15)!important}
+.tiktok-handle-input{font-size:17px!important;font-weight:400!important;padding:17px 0!important}
+.tiktok-handle-input::placeholder{font-size:16px!important;color:#929296!important;font-weight:400!important;opacity:1!important}
+.clear-input-btn{right:12px!important;background:transparent!important;font-size:15px!important}
+.tiktok-profile-status{margin:0!important}
+.tiktok-card-loader,.tiktok-profile-preview,.tiktok-default-card{min-height:84px!important;margin:10px 0 20px!important;padding:12px 14px!important;border:0!important;border-radius:10px!important;background:#f5f5f5!important;box-shadow:none!important}
+.tiktok-profile-preview{gap:14px!important}
+.tiktok-profile-avatar,.tiktok-letter-avatar{width:58px!important;height:58px!important}
+.tiktok-profile-name,.tiktok-default-name{font-size:16px!important;font-weight:700!important}
+.tiktok-profile-handle,.tiktok-default-handle{font-size:14px!important;margin-top:2px!important;color:#8a8a8f!important}
+.tiktok-profile-counts,.tiktok-default-stats{font-size:11px!important;margin-top:2px!important}
+.exchange-amount-label{margin-top:2px!important;margin-bottom:12px!important}
+.preset-cards-container{gap:8px!important;margin-bottom:14px!important}
+.preset-card{height:82px!important;min-height:82px!important;padding:13px 4px!important;border:0!important;border-radius:10px!important;background:#f5f5f5!important}
+.preset-card.selected{border:1.5px solid #fe2c55!important;background:#fff6f7!important;box-shadow:none!important}
+.preset-coin-val{font-size:17px!important;font-weight:700!important;margin-bottom:5px!important}
+.preset-coin-val .coin-icon{width:17px!important;height:17px!important}
+.preset-usd-val{font-size:13px!important;color:#8a8a8f!important}
+.custom-trigger-box{height:70px!important;min-height:70px!important;margin:0 0 24px!important;padding:0 18px!important;border-radius:10px!important;background:#f5f5f5!important;font-size:15px!important;color:#929296!important}
+.policy-box{margin-top:auto!important;margin-bottom:8px!important;padding:0!important;background:transparent!important;border-radius:0!important;font-size:12.5px!important;line-height:1.45!important;color:#8a8a8f!important}
+.policy-top b{color:#33343a!important}
+.sheet-footer{padding:8px 18px max(14px,env(safe-area-inset-bottom))!important;border:0!important;background:#fff!important}
+.sheet-footer .btn-primary{height:56px!important;min-height:56px!important;border-radius:9px!important;font-size:16px!important;box-shadow:none!important}
+@media(max-width:390px){.exchange-header-balance{font-size:35px!important;margin-top:16px!important}.balance-helper{margin-bottom:26px!important}.exchange-sheet .sheet-body{padding-left:16px!important;padding-right:16px!important}.sheet-footer{padding-left:16px!important;padding-right:16px!important}}
+</style>
+<style id="mode3-cross-border-fix">
+/* Borderless TikTok-style close X */
+#mainHomeView .promo-close, #closeBannerBtn{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;padding:0!important;border-radius:0!important;-webkit-appearance:none!important;appearance:none!important;}
+</style>
+
+<style id="mode3-final-mobile-fixes">
+/* Final Mode 3 mobile fixes: plain top X, clean back chevron, no horizontal overflow */
+html,body{max-width:100%;overflow-x:hidden!important}
+.phone-container{overflow:hidden!important}
+.phone-container>.top-bar .app-settings-btn{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;border-radius:0!important;padding:0!important;-webkit-appearance:none!important;appearance:none!important}
+.exchange-sheet{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+.exchange-sheet>.top-bar .back-btn{overflow:visible!important;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important}
+.exchange-sheet>.top-bar .back-btn:before{content:''!important;position:absolute!important;left:8px!important;top:8px!important;width:12px!important;height:12px!important;border-left:2.2px solid #161823!important;border-bottom:2.2px solid #161823!important;transform:rotate(45deg)!important}
+.exchange-sheet>.top-bar .back-btn:after{display:none!important;content:none!important}
+.exchange-sheet .sheet-body{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow-x:hidden!important}
+.exchange-header-balance{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;font-size:clamp(28px,9.2vw,38px)!important;letter-spacing:-1.2px!important}
+.exchange-sub-balance{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;display:flex!important;justify-content:center!important;align-items:center!important;flex-wrap:wrap!important;overflow-wrap:anywhere!important;line-height:1.35!important}
+.balance-helper,.exchange-sheet .section-label,.input-wrapper,.tiktok-profile-status,.preset-cards-container,.custom-trigger-box,.policy-box{max-width:100%!important;box-sizing:border-box!important}
+@media(max-width:430px){.exchange-header-balance{font-size:clamp(27px,8.8vw,36px)!important}.exchange-sub-balance{font-size:13px!important}.balance-helper{font-size:13px!important}.exchange-sheet>.top-bar .top-title{font-size:19px!important}}
+@media(max-width:360px){.exchange-header-balance{font-size:28px!important;letter-spacing:-.8px!important}.exchange-sub-balance{font-size:12px!important}.exchange-sheet .sheet-body{padding-left:14px!important;padding-right:14px!important}}
+</style>
+
+<style id="final-polish-transaction-dividers">
+/* Clean, separate transaction rows across all modes */
+#txListContainer .tx-row{position:relative!important;border-bottom:1px solid #ececef!important;}
+#txListContainer .tx-row:last-child{border-bottom:0!important;}
+#txListContainer .tx-row + .tx-row{margin-top:0!important;}
+</style>
+<style>
+  /* Coin sizing + iOS Safari PNG repaint fix */
+  .custom-coin-icon { width:25px !important; height:25px !important; flex:0 0 25px; }
+  .preset-coin-val .coin-icon { width:19px !important; height:19px !important; flex:0 0 19px; }
+  @supports (-webkit-touch-callout: none) {
+    .custom-coin-icon, .preset-coin-val .coin-icon {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      -webkit-perspective: 1000;
+      image-rendering: auto;
+    }
+    #displayCoinValue { -webkit-transform: translateZ(0); transform: translateZ(0); }
+  }
+</style>
+<style id="classic-v2-video-match">
+/* Classic V2 — matched to supplied reference video: compact pink/red C-ring */
+body[data-search-loader="classicv2"] .tiktok-card-spinner{width:24px!important;height:24px!important;border:3px solid rgba(254,44,85,.18)!important;border-top-color:#fe2c55!important;border-right-color:#fe2c55!important;border-radius:50%!important;background:transparent!important;animation:classicV2Ring .72s linear infinite!important;position:relative!important;box-shadow:none!important}
+body[data-search-loader="classicv2"] .tiktok-card-spinner i{display:none!important}
+body[data-payment-loader="classicv2"] .processing-spinner{width:34px!important;height:34px!important;border:4px solid rgba(254,44,85,.18)!important;border-top-color:#fe2c55!important;border-right-color:#fe2c55!important;border-radius:50%!important;background:transparent!important;animation:classicV2Ring .72s linear infinite!important;position:relative!important;box-shadow:none!important}
+body[data-payment-loader="classicv2"] .processing-spinner i{display:none!important}
+@keyframes classicV2Ring{to{transform:rotate(360deg)}}
+</style>
+<style id="mode3-success-leaves">
+.success-check-icon{width:68px!important;height:68px!important;border-radius:50%!important;background:linear-gradient(145deg,#16d18f,#08b979)!important;box-shadow:0 8px 22px rgba(18,201,138,.20)!important;display:grid!important;place-items:center!important;position:relative!important;overflow:visible!important}
+.success-check-icon svg{width:38px!important;height:38px!important;stroke:#fff!important;stroke-width:4!important;position:relative;z-index:2}
+.success-check-icon:before,.success-check-icon:after{content:"";position:absolute;width:16px;height:29px;background:#48d79f;border-radius:100% 0 100% 0;opacity:.9;z-index:0}
+.success-check-icon:before{left:-19px;bottom:2px;transform:rotate(-34deg)}
+.success-check-icon:after{right:-19px;bottom:2px;transform:scaleX(-1) rotate(-34deg)}
+.success-screen.open .success-check-icon:before{animation:leafInL .55s .18s both cubic-bezier(.2,.8,.2,1)}
+.success-screen.open .success-check-icon:after{animation:leafInR .55s .24s both cubic-bezier(.2,.8,.2,1)}
+@keyframes leafInL{from{opacity:0;transform:translate(8px,8px) rotate(-15deg) scale(.5)}to{opacity:.9;transform:rotate(-34deg) scale(1)}}
+@keyframes leafInR{from{opacity:0;transform:translate(-8px,8px) scaleX(-1) rotate(-15deg) scale(.5)}to{opacity:.9;transform:scaleX(-1) rotate(-34deg) scale(1)}}
+</style>
+</head>
+<body class="auth-pending">
+
+<div class="phone-container">
+  <div class="access-time-toast" id="accessTimeToast"></div>
+
+  <!-- IOS STYLE NOTIFICATION BANNER -->
+  <div class="ios-notification-banner" id="iosNotification">
+    <div class="ios-notif-icon"><img src="assets/tiktok-logo.webp" alt="TikTok"></div>
+    <div class="ios-notif-body">
+      <div class="ios-notif-title-row">
+        <span class="ios-notif-app-title">TikTok LIVE Rewards</span>
+        <span class="ios-notif-time">Now</span>
+      </div>
+      <div class="ios-notif-message" id="iosNotifMsg">Successfully sent 250 Coins to @handle</div>
+    </div>
+  </div>
+
+  <!-- TOP APP BAR -->
+  <div class="top-bar">
+    <button class="back-btn">‹</button>
+    <div class="top-title">LIVE rewards</div>
+    <button class="help-btn app-settings-btn" id="appSettingsBtn" aria-label="Open toolbox" title="Toolbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20.3h-3v-.08A1.7 1.7 0 0 0 10.68 18.66a1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7.02 15a1.7 1.7 0 0 0-1.56-1.03H5.4v-3h.06A1.7 1.7 0 0 0 7.02 9.94a1.7 1.7 0 0 0-.34-1.88L6.62 8l2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 11.71 4.7v-.08h3v.08a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06L19.8 8l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.03h.08v3h-.08A1.7 1.7 0 0 0 19.4 15Z"></path></svg></button>
+  </div>
+
+  <!-- MAIN HOME VIEW -->
+  <div class="scroll-content" id="mainHomeView">
+    
+    <!-- BANNER -->
+    <div class="promo-banner" id="promoBanner">
+      <div class="promo-header">
+        <div class="promo-title">Say hi to Scaled LIVE Rewards</div>
+        <button class="promo-close" id="closeBannerBtn">✕</button>
+      </div>
+      <div class="promo-desc">Your dedication to quality content could get you a rewards percentage of up to 53%.</div>
+      <a href="#" class="promo-link">Learn more</a>
+    </div>
+
+    <!-- TABS -->
+    <div class="rewards-tabs">
+      <div class="tab-card active">
+        <div class="tab-label">Available rewards</div>
+        <div class="tab-value" id="tabAvailableAmt">$9,691,068.00</div>
+      </div>
+      <div class="tab-card">
+        <div class="tab-label">Upcoming rewards</div>
+        <div class="tab-value" id="tabUpcomingAmt">$2,000,000.00</div>
+      </div>
+    </div>
+
+    <!-- BALANCE CENTERPIECE -->
+    <div class="balance-display-section">
+      <div class="balance-title">Available rewards</div>
+      <div class="balance-amount" id="homeBalanceAmount">$9,691,068.00</div>
+      <div class="balance-approx" id="homeBalanceApprox">= $9,691,068.00 ( <img src="coin.png" alt="Coin" class="coin-icon"> <span id="homeCoinBalance">706,416,866</span> )</div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="action-buttons">
+      <button class="btn btn-primary" id="openExchangeBtn">Exchange</button>
+      <button class="btn btn-secondary" id="withdrawBtn">Withdraw</button>
+    </div>
+
+    <div class="limit-text">Daily withdrawal limit (Remain/Total)</div>
+
+    <!-- TRANSACTIONS -->
+    <div class="transactions-section">
+      <div class="tx-header">
+        <div class="tx-title">Transactions</div>
+        <div class="tx-filter">Jun 2026 ▾</div>
+      </div>
+      <div class="tx-list" id="txListContainer">
+        <div class="tx-row">
+          <div class="tx-info">
+            <h4>Sent 10,000 Coins to @Abbygirl0905</h4>
+            <span>8/3/2026 23:40:47</span>
+          </div>
+          <div class="tx-amount">-$3.03</div>
+        </div>
+        <div class="tx-row">
+          <div class="tx-info">
+            <h4>LIVE Payout</h4>
+            <span>6/1/2026 12:00:00</span>
+          </div>
+          <div class="tx-amount" style="color: var(--success);">+$1,276,819.98</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- EXCHANGE SHEET -->
+  <div class="exchange-sheet" id="exchangeSheet">
+    <div class="top-bar">
+      <button class="back-btn" id="closeExchangeSheet">‹</button>
+      <div class="top-title">Exchange</div>
+      <button class="help-btn" id="giftHelpBtn" style="width:22px; height:22px; font-size:11px;">?</button>
+    </div>
+
+    <div class="sheet-body">
+      <div class="balance-kicker">TikTok Coins Balance</div>
+      <div class="exchange-header-balance" id="exchangeBalanceAmount">$9,691,068.00</div>
+      <div class="exchange-sub-balance" id="exchangeBalanceApprox">= $9,691,068.00 ( <img src="coin.png" alt="Coin" class="coin-icon"> <span id="exchangeCoinBalance">706,416,866</span> )</div>
+      <div class="balance-helper">Available balance to exchange the Coins</div>
+
+      <label class="section-label" for="tiktokHandle">TikTok username</label>
+      <div class="input-wrapper">
+        <input type="text" class="tiktok-handle-input" id="tiktokHandle" value="" placeholder="Enter TikTok username" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <button class="clear-input-btn" id="clearUsernameBtn" type="button" aria-label="Clear TikTok username">✕</button>
+      </div>
+      <div class="tiktok-profile-status" id="tiktokProfileStatus" aria-live="polite"></div>
+
+      <div class="tiktok-card-loader" id="tiktokCardLoader" aria-label="Loading TikTok profile">
+        <div class="tiktok-card-spinner"><i></i><i></i><i></i><i></i></div>
+      </div>
+
+      <!-- TikTok Profile Preview Card -->
+      <div class="tiktok-profile-results" id="tiktokProfileResults">
+        <div class="tiktok-profile-preview" id="tiktokProfilePreview">
+          <img class="tiktok-profile-avatar" id="tiktokPfp" src="" alt="TikTok profile photo">
+          <div class="tiktok-profile-copy">
+            <div class="tiktok-profile-name" id="tiktokName"></div>
+            <div class="tiktok-profile-handle" id="tiktokUsernameDisplay"></div>
+            <div class="tiktok-profile-counts"><span id="tiktokFollowers"></span><span id="tiktokFollowing"></span></div>
+          </div>
+        </div>
+      </div>
+      <iframe class="tiktok-official-embed" id="tiktokOfficialEmbed" title="TikTok creator profile" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin"></iframe>
+      <div class="tiktok-default-card" id="tiktokDefaultCard">
+        <div class="tiktok-letter-avatar" id="tiktokLetterAvatar" aria-hidden="true">?</div>
+        <div class="tiktok-default-info">
+          <div class="tiktok-default-name" id="tiktokDefaultName"></div>
+          <div class="tiktok-default-handle" id="tiktokDefaultHandle"></div>
+          <div class="tiktok-default-stats">
+            <span id="tiktokDefaultStats">Live stats unavailable</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label exchange-amount-label">Exchange earnings for Coins</div>
+
+      <!-- PRESET CARDS GRID -->
+      <div class="preset-cards-container" id="presetCardsContainer">
+        <div class="preset-card" data-coins="250" data-usd="3.03" role="button" tabindex="0" aria-pressed="false">
+          <div class="preset-coin-val"><img src="coin.png" alt="Coin" class="coin-icon"> 250</div>
+          <div class="preset-usd-val">$3.03</div>
+        </div>
+        <div class="preset-card" data-coins="500" data-usd="6.07" role="button" tabindex="0" aria-pressed="false">
+          <div class="preset-coin-val"><img src="coin.png" alt="Coin" class="coin-icon"> 500</div>
+          <div class="preset-usd-val">$6.07</div>
+        </div>
+        <div class="preset-card" data-coins="15000" data-usd="182.04" role="button" tabindex="0" aria-pressed="false">
+          <div class="preset-coin-val"><img src="coin.png" alt="Coin" class="coin-icon"> 15,000</div>
+          <div class="preset-usd-val">$182.04</div>
+        </div>
+      </div>
+
+      <!-- CLICKABLE CUSTOM BOX -->
+      <div class="custom-trigger-box" id="customTriggerBox">
+        Enter a custom number or amount
+      </div>
+
+      <div class="policy-box">
+        <div class="policy-top">
+          <span>Coins obtained through this exchange are subject to our <b>Virtual Items Policy</b>. Since you are accepting your Rewards in the form of Coins, this exchange is also subject to our <b>Rewards Policy</b>. This exchange cannot be canceled or reversed.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-footer">
+      <button class="btn btn-primary" id="triggerConfirmDialog">Exchange</button>
+    </div>
+  </div>
+
+  <!-- CUSTOM KEYPAD OVERLAY MODAL -->
+  <div class="custom-keypad-overlay" id="customKeypadOverlay">
+    <div class="custom-keypad-sheet">
+      <div class="custom-sheet-header">
+        <div class="custom-sheet-title">Custom</div>
+        <button class="custom-sheet-close" id="closeKeypadOverlay">✕</button>
+      </div>
+
+      <div class="custom-sheet-dropdown-label">
+        Number of Coins <span>⌄</span>
+      </div>
+
+      <div class="coin-input-box-modal">
+        <span class="val-text" id="displayCoinValue">
+          <img src="coin.png" alt="Coin" class="coin-icon custom-coin-icon"> <span id="displayCoinNumber">0</span>
+        </span>
+        <div class="all-badge-text" id="allCoinsBtn">All</div>
+      </div>
+
+      <div class="conversion-row-modal">
+        <span id="conversionEurText">€0.00</span>
+        <span>≈</span>
+        <span id="conversionUsdText">$0.00</span>
+      </div>
+
+      <!-- TIKTOK CUSTOM KEYPAD GRID -->
+      <div class="keypad-grid" id="customKeypad">
+        <button class="key-btn" data-key="1">1</button>
+        <button class="key-btn" data-key="2">2</button>
+        <button class="key-btn" data-key="3">3</button>
+        <button class="key-btn backspace-key" data-key="back">
+          <svg width="22" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+        </button>
+        <button class="key-btn" data-key="4">4</button>
+        <button class="key-btn" data-key="5">5</button>
+        <button class="key-btn" data-key="6">6</button>
+        <button class="key-btn triple-zero" data-key="000">000</button>
+        <button class="key-btn" data-key="7">7</button>
+        <button class="key-btn" data-key="8">8</button>
+        <button class="key-btn" data-key="9">9</button>
+        <button class="key-btn" data-key="0">0</button>
+      </div>
+
+      <div style="font-size:11.5px; color:var(--text-dim); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;">
+        <span style="display:flex; align-items:center; gap:4px;"><span style="border:1px solid #aaa; border-radius:50%; width:14px; height:14px; display:inline-flex; align-items:center; justify-content:center; font-size:9px;">?</span> €0.00 ≈ $0.00</span>
+        <span style="font-size:11px;">Coins obtained through this exchange are subject to our <b>Virtual Items Policy</b>...</span>
+      </div>
+
+      <div class="custom-total-row">
+        <span>Total</span>
+        <strong id="customTotalText">$0.00</strong>
+      </div>
+
+      <button class="btn btn-primary" id="confirmCustomAmountBtn">Exchange</button>
+    </div>
+  </div>
+
+  <div class="gift-help-overlay" id="giftHelpOverlay"><section class="gift-help-panel"><div class="gift-help-head"><h2>TikTok Gifts</h2><button class="gift-close" id="giftCloseBtn">×</button></div><div class="gift-list" id="giftList"><button class="gift-option" data-gift="rose"><span class="gift-icon"><img src="assets/rose.jpg" alt="Rose"></span><span><b>Rose</b><small><img src="coin.png">1 coin</small></span></button><button class="gift-option" data-gift="moneygun"><span class="gift-icon"><img src="assets/moneygun.jpg" alt="Money Gun"></span><span><b>Money Gun</b><small><img src="coin.png">1,000,000 coins</small></span></button><button class="gift-option" data-gift="galaxy"><span class="gift-icon"><img src="assets/galaxy.jpg" alt="Galaxy"></span><span><b>Galaxy</b><small><img src="coin.png">3,000,000 coins</small></span></button></div><div class="gift-detail" id="giftDetail"><div class="gift-detail-icon" id="giftDetailIcon"></div><h3 id="giftDetailName"></h3><div class="gift-detail-cost"><img src="coin.png"><span id="giftDetailCost"></span></div><p id="giftDetailText"></p><button class="gift-send" id="giftSendBtn"></button><br><button class="gift-back" id="giftBackBtn">‹ All gifts</button></div></section></div>
+  <!-- CONFIRMATION MODAL -->
+  <div class="dialog-overlay" id="confirmDialog">
+    <div class="dialog-box">
+      <div class="dialog-icon-container">
+        <img src="./complete-exchange-coin.png" alt="Complete Exchange" class="dialog-main-coin" id="dialogMainCoinImg">
+      </div>
+      <div class="dialog-title" id="dialogTitleText">Complete exchange for 250 Coins?</div>
+      <div class="dialog-msg" id="dialogMsgText">$3.03 will be deducted from estimated LIVE rewards</div>
+      <div class="dialog-actions">
+        <button class="dialog-btn dialog-btn-cancel" id="cancelDialogBtn">Go back</button>
+        <button class="dialog-btn dialog-btn-confirm" id="finalExchangeBtn">Complete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="processing-overlay" id="processingOverlay" role="status" aria-live="polite">
+    <div class="processing-spinner"><i></i><i></i><i></i><i></i></div>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-body">
+      <div class="success-check-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <div class="success-heading">Exchange Completed!</div>
+      <div class="success-subtext">You exchanged for <img src="coin.png" alt="" class="coin-icon"> <strong id="successCoinSummary">250 Coins</strong></div>
+
+      <div class="success-receipt">
+        <div class="success-receipt-row"><span>Recipient</span><strong id="successRecipient">@username</strong></div>
+        <div class="success-receipt-row"><span>Coins Exchanged</span><strong id="successCoinsExchanged">250 Coins</strong></div>
+        <div class="success-receipt-row"><span>Deducted Amount</span><strong id="successDeductedAmount">$3.03</strong></div>
+        <div class="success-receipt-row"><span>Time</span><strong id="successTime">8/20/2026, 7:07:19 AM</strong></div>
+      </div>
+
+      <div class="success-extra">
+        <div class="gifter-card">
+          <div class="gifter-icon"><img src="assets/tiktok-logo.webp" alt="TikTok"></div>
+          <div class="gifter-copy">
+            <h3>Start gifter level</h3>
+            <p>Send your first Gift to begin your gifter journey and unlock more rewards as you level up.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="success-footer">
+      <button class="btn btn-primary" id="successDoneBtn">← Go back</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  (function(){
+    let selectedMode = null; // 'preset', 'custom', or null
+    let currentPresetCoins = 0;
+    let currentPresetUsd = 0;
+    let customCoinsStr = "";
+    const DISPLAY_SETTINGS_KEY = 'walletDisplaySettings';
+    const TOOLBOX_DEFAULTS = {availableRewards:9691068,upcomingRewards:2000000,coins:706416866,autoRemoveAt:false,withdrawalName:'Complete exchange',transferDetailsTitle:'Exchange Completed!',transferLabel:'estimated LIVE rewards',followerSize:'2',exchangeLoading:true,exchangeLoadingDuration:'1',paymentLoading:true,paymentAnimationType:'classic',paymentAnimationDuration:'2',paymentLoadingColor:'pink',searchLoading:true,searchAnimationType:'classic',searchAnimationDuration:'1',searchLoadingColor:'pink',usernameBorderColor:'pink',usernameBorderCustom:'#fe2c55'};
+    let savedDisplaySettings = {};
+    try { savedDisplaySettings = {...TOOLBOX_DEFAULTS,...JSON.parse(localStorage.getItem(DISPLAY_SETTINGS_KEY) || '{}')}; } catch { savedDisplaySettings = {...TOOLBOX_DEFAULTS}; }
+    const palette={pink:'#fe2c55',cyan:'#00cfc8',green:'#20b56b',purple:'#7657ff',gold:'#d49b10',blue:'#246bfd',yellow:'#e6b800',black:'#161823'};
+    const resolveColor=(name,custom)=>name==='custom'?(custom||'#fe2c55'):(palette[name]||'#fe2c55');
+    document.body.dataset.searchLoader=savedDisplaySettings.searchAnimationType||'classic';
+    document.body.dataset.paymentLoader=savedDisplaySettings.paymentAnimationType||'classic';
+    document.body.dataset.usernameBorder=savedDisplaySettings.usernameBorderColor||'pink';
+    document.body.style.setProperty('--search-loader-color',resolveColor(savedDisplaySettings.searchLoadingColor));
+    document.body.style.setProperty('--payment-loader-color',resolveColor(savedDisplaySettings.paymentLoadingColor));
+    document.body.style.setProperty('--username-border-color',resolveColor(savedDisplaySettings.usernameBorderColor,savedDisplaySettings.usernameBorderCustom));
+    document.body.style.setProperty('--loader-primary',resolveColor(savedDisplaySettings.paymentLoadingColor));
+    document.body.style.setProperty('--loader-secondary',resolveColor(savedDisplaySettings.paymentLoadingColor));
+    const followerSizes={1:'10px',2:'12px',3:'13px',4:'14px',5:'15px',6:'16px'};
+    document.documentElement.style.setProperty('--toolbox-follower-size',followerSizes[String(savedDisplaySettings.followerSize)]||'12px');
+    let availableUsd = Number.isFinite(Number(savedDisplaySettings.availableRewards ?? savedDisplaySettings.usd)) ? Math.max(0, Number(savedDisplaySettings.availableRewards ?? savedDisplaySettings.usd)) : 8573020.22;
+    let availableCoins = Number.isFinite(Number(savedDisplaySettings.coins)) ? Math.max(0, Math.floor(Number(savedDisplaySettings.coins))) : 706416866;
+    const paymentLoadingDurationMs=Math.max(0,Number(savedDisplaySettings.paymentAnimationDuration||2)*1000);
+    const searchLoadingDurationMs=Math.max(0,Number(savedDisplaySettings.searchAnimationDuration||1)*1000);
+    let pendingBalanceAnimation = null;
+
+    const openExchangeBtn = document.getElementById('openExchangeBtn');
+    const withdrawBtn = document.getElementById('withdrawBtn');
+    const exchangeSheet = document.getElementById('exchangeSheet');
+    const closeExchangeSheet = document.getElementById('closeExchangeSheet');
+    const closeBannerBtn = document.getElementById('closeBannerBtn');
+    const promoBanner = document.getElementById('promoBanner');
+    
+    const presetCardsContainer = document.getElementById('presetCardsContainer');
+    const customTriggerBox = document.getElementById('customTriggerBox');
+    
+    const customKeypadOverlay = document.getElementById('customKeypadOverlay');
+    const closeKeypadOverlay = document.getElementById('closeKeypadOverlay');
+    const confirmCustomAmountBtn = document.getElementById('confirmCustomAmountBtn');
+    const customKeypad = document.getElementById('customKeypad');
+    
+    const triggerConfirmDialog = document.getElementById('triggerConfirmDialog');
+    const confirmDialog = document.getElementById('confirmDialog');
+    const cancelDialogBtn = document.getElementById('cancelDialogBtn');
+    const finalExchangeBtn = document.getElementById('finalExchangeBtn');
+    const processingOverlay = document.getElementById('processingOverlay');
+    
+    const successScreen = document.getElementById('successScreen');
+    const successDoneBtn = document.getElementById('successDoneBtn');
+    const successCoinSummary = document.getElementById('successCoinSummary');
+    const successRecipient = document.getElementById('successRecipient');
+    const successCoinsExchanged = document.getElementById('successCoinsExchanged');
+    const successDeductedAmount = document.getElementById('successDeductedAmount');
+    const successTime = document.getElementById('successTime');
+
+    const displayCoinValue = document.getElementById('displayCoinValue');
+    const conversionEurText = document.getElementById('conversionEurText');
+    const conversionUsdText = document.getElementById('conversionUsdText');
+    const customTotalText = document.getElementById('customTotalText');
+    const allCoinsBtn = document.getElementById('allCoinsBtn');
+    const tiktokHandle = document.getElementById('tiktokHandle');
+    const clearUsernameBtn = document.getElementById('clearUsernameBtn');
+    const dialogTitleText = document.getElementById('dialogTitleText');
+    const dialogMsgText = document.getElementById('dialogMsgText');
+    const dialogMainCoinImg = document.getElementById('dialogMainCoinImg');
+    
+    const txListContainer = document.getElementById('txListContainer');
+    const tabAvailableAmt = document.getElementById('tabAvailableAmt');
+    const tabUpcomingAmt = document.getElementById('tabUpcomingAmt');
+    const homeBalanceAmount = document.getElementById('homeBalanceAmount');
+    function syncHomeDisplayAmount(){ if(homeBalanceAmount){ const raw=(homeBalanceAmount.textContent||'').replace(/[^0-9.,]/g,''); homeBalanceAmount.setAttribute('data-display-amount', raw || '0.00'); } }
+    const homeBalanceApprox = document.getElementById('homeBalanceApprox');
+    syncHomeDisplayAmount();
+    const homeCoinBalance = document.getElementById('homeCoinBalance');
+    const exchangeBalanceAmount = document.getElementById('exchangeBalanceAmount');
+    const exchangeBalanceApprox = document.getElementById('exchangeBalanceApprox');
+    const exchangeCoinBalance = document.getElementById('exchangeCoinBalance');
+    
+    const iosNotification = document.getElementById('iosNotification');
+    const iosNotifMsg = document.getElementById('iosNotifMsg');
+    const giftHelpBtn = document.getElementById('giftHelpBtn');
+    const giftHelpOverlay = document.getElementById('giftHelpOverlay');
+    const giftList = document.getElementById('giftList');
+    const giftDetail = document.getElementById('giftDetail');
+    const giftData = { rose:['assets/rose.jpg','Rose','1 coin','Send roses to show your support and help accounts earn coins quickly.'], moneygun:['assets/moneygun.jpg','Money Gun','1,000,000 coins','Send a Money Gun as a big coin gift for your favorite creator.'], galaxy:['assets/galaxy.jpg','Galaxy','3,000,000 coins','Send a Galaxy to make a spectacular show of support.'] };
+    function closeGiftHelp(){ giftHelpOverlay.classList.remove('open'); }
+    giftHelpBtn.addEventListener('click', () => { giftList.classList.remove('hidden'); giftDetail.classList.remove('visible'); giftHelpOverlay.classList.add('open'); });
+    document.getElementById('giftCloseBtn').addEventListener('click', closeGiftHelp);
+    giftHelpOverlay.addEventListener('click', event => { if (event.target === giftHelpOverlay) closeGiftHelp(); });
+    giftList.addEventListener('click', event => { const gift = giftData[event.target.closest('[data-gift]')?.dataset.gift]; if (!gift) return; document.getElementById('giftDetailIcon').innerHTML=`<img src="${gift[0]}" alt="${gift[1]}">`; document.getElementById('giftDetailName').textContent=`TikTok Gift · ${gift[1]}`; document.getElementById('giftDetailCost').textContent=gift[2]; document.getElementById('giftDetailText').textContent=gift[3]; document.getElementById('giftSendBtn').textContent=`Send ${gift[1]}`; giftList.classList.add('hidden'); giftDetail.classList.add('visible'); });
+    document.getElementById('giftBackBtn').addEventListener('click', () => { giftList.classList.remove('hidden'); giftDetail.classList.remove('visible'); });
+    document.getElementById('giftSendBtn').addEventListener('click', closeGiftHelp);
+    let notificationTimer, notificationStartY = null;
+    function dismissNotification(){ clearTimeout(notificationTimer); iosNotification.classList.remove('show','dragging'); iosNotification.style.transform=''; }
+    function showNotification(message){ clearTimeout(notificationTimer); iosNotifMsg.textContent=message; iosNotification.style.transform=''; iosNotification.classList.add('show'); notificationTimer=setTimeout(dismissNotification,4000); }
+    iosNotification.addEventListener('pointerdown', event => { notificationStartY=event.clientY; iosNotification.classList.add('dragging'); iosNotification.setPointerCapture(event.pointerId); });
+    iosNotification.addEventListener('pointermove', event => { if(notificationStartY===null)return; const distance=Math.min(0,event.clientY-notificationStartY); iosNotification.style.transform=`translateY(${92+distance}px)`; });
+    iosNotification.addEventListener('pointerup', event => { const distance=event.clientY-notificationStartY; notificationStartY=null; if(distance < -30)dismissNotification(); else { iosNotification.classList.remove('dragging'); iosNotification.style.transform=''; } });
+    document.getElementById('appSettingsBtn').addEventListener('click', () => location.href = '/login.html?settings=1&mode=mode3');
+    renderBalances(availableUsd, availableCoins);
+
+    const tiktokProfilePreview = document.getElementById('tiktokProfilePreview');
+    const tiktokProfileResults = document.getElementById('tiktokProfileResults');
+    const tiktokProfileStatus = document.getElementById('tiktokProfileStatus');
+    const tiktokPfp = document.getElementById('tiktokPfp');
+    const tiktokName = document.getElementById('tiktokName');
+    const tiktokUsernameDisplay = document.getElementById('tiktokUsernameDisplay');
+    const tiktokFollowers = document.getElementById('tiktokFollowers');
+    const tiktokFollowing = document.getElementById('tiktokFollowing');
+    const tiktokCardLoader = document.getElementById('tiktokCardLoader');
+    const tiktokOfficialEmbed = document.getElementById('tiktokOfficialEmbed');
+    const tiktokDefaultCard = document.getElementById('tiktokDefaultCard');
+    const tiktokDefaultName = document.getElementById('tiktokDefaultName');
+    const tiktokDefaultHandle = document.getElementById('tiktokDefaultHandle');
+    if (tabUpcomingAmt) tabUpcomingAmt.textContent = `$${Math.max(0,Number(savedDisplaySettings.upcomingRewards||0)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+    document.querySelectorAll('.tiktok-profile-counts,.tiktok-default-stats').forEach(el=>el.style.fontSize=`var(--toolbox-follower-size)`);
+    const successHeadingEl=document.querySelector('.success-heading');
+    if(successHeadingEl) successHeadingEl.textContent=savedDisplaySettings.transferDetailsTitle||'Exchange Completed!';
+
+    let typingTimer;
+    let profileRequestId = 0;
+    let profileLoadingStartedAt = 0;
+    const doneTypingInterval = 500;
+
+    openExchangeBtn.addEventListener('click', () => {
+      if (openExchangeBtn.classList.contains('exchange-opening')) return;
+      if (savedDisplaySettings.exchangeLoading === false) { exchangeSheet.classList.add('open'); return; }
+      openExchangeBtn.classList.add('exchange-opening');
+      const exchangeDelay = Math.max(1, Math.min(4, Number(savedDisplaySettings.exchangeLoadingDuration || 1))) * 1000;
+      setTimeout(() => { openExchangeBtn.classList.remove('exchange-opening'); exchangeSheet.classList.add('open'); }, exchangeDelay);
+    });
+    withdrawBtn.addEventListener('click', () => { exchangeSheet.classList.add('open'); });
+    closeExchangeSheet.addEventListener('click', () => { exchangeSheet.classList.remove('open'); });
+    closeBannerBtn.addEventListener('click', () => { promoBanner.style.display = 'none'; });
+
+    tiktokHandle.addEventListener('input', () => {
+      if(savedDisplaySettings.autoRemoveAt && tiktokHandle.value.includes('@')){tiktokHandle.value=tiktokHandle.value.replace(/@/g,'');}
+      const handle = tiktokHandle.value.trim();
+      if (handle) {
+        clearUsernameBtn.classList.add('visible');
+      } else {
+        clearUsernameBtn.classList.remove('visible');
+        hideTikTokProfile();
+      }
+
+      clearTimeout(typingTimer);
+      if (handle) {
+        // Only one TikTok username/search card is supported at a time.
+        if (handle.includes(',')) {
+          hideTikTokProfile('Enter only one TikTok username.', true);
+          return;
+        }
+        tiktokProfileStatus.classList.remove('error');
+        tiktokProfileStatus.textContent = `Searching ${handle.startsWith('@') ? handle : '@' + handle}…`;
+        tiktokProfilePreview.classList.remove('visible');
+        clearExtraTikTokProfiles();
+        tiktokDefaultCard.classList.remove('visible');
+        tiktokOfficialEmbed.classList.remove('visible');
+        if(savedDisplaySettings.searchLoading!==false) tiktokCardLoader.classList.add('visible');
+        profileLoadingStartedAt = performance.now();
+        typingTimer = setTimeout(() => fetchTikTokUser(handle), doneTypingInterval);
+      }
+    });
+
+    clearUsernameBtn.addEventListener('click', () => {
+      tiktokHandle.value = "";
+      clearUsernameBtn.classList.remove('visible');
+      profileRequestId++;
+      hideTikTokProfile();
+      tiktokHandle.focus();
+    });
+
+    function hideTikTokProfile(message = '', isError = false) {
+      clearExtraTikTokProfiles();
+      tiktokProfilePreview.classList.remove('visible');
+      tiktokOfficialEmbed.classList.remove('visible');
+      tiktokOfficialEmbed.removeAttribute('srcdoc');
+      tiktokDefaultCard.classList.remove('visible');
+      tiktokCardLoader.classList.remove('visible');
+      tiktokPfp.removeAttribute('src');
+      tiktokProfileStatus.textContent = message;
+      tiktokProfileStatus.classList.toggle('error', isError);
+    }
+
+    function clearExtraTikTokProfiles() {
+      tiktokProfileResults.querySelectorAll('.secondary-profile').forEach(card => card.remove());
+      tiktokProfileResults.classList.remove('two-results');
+    }
+
+    function showDefaultTikTokProfile(handle) {
+      const displayHandle = handle.startsWith('@') ? handle : `@${handle}`;
+      const cleanName = handle.replace(/^@+/, '').trim();
+      tiktokProfilePreview.classList.remove('visible');
+      tiktokOfficialEmbed.classList.remove('visible');
+      tiktokOfficialEmbed.removeAttribute('srcdoc');
+      tiktokDefaultName.textContent = cleanName;
+      const letterEl = document.getElementById('tiktokLetterAvatar');
+      if (letterEl) letterEl.textContent = (cleanName.charAt(0) || '?').toUpperCase();
+      tiktokDefaultHandle.textContent = displayHandle;
+      const defaultStats = document.getElementById('tiktokDefaultStats');
+      if (defaultStats) defaultStats.textContent = 'LIVE creator account';
+      tiktokDefaultCard.classList.add('visible');
+      tiktokCardLoader.classList.remove('visible');
+      tiktokProfileStatus.textContent = '';
+      tiktokProfileStatus.classList.remove('error');
+    }
+
+    function letterAvatarData(name) {
+      return (String(name || '?').replace(/^@+/, '').trim().charAt(0) || '?').toUpperCase();
+    }
+
+    function formatTikTokCount(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n) || n < 0) return null;
+
+      if (n >= 1000000000) {
+        const v = n / 1000000000;
+        return `${v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}B`;
+      }
+      if (n >= 1000000) {
+        const v = n / 1000000;
+        return `${v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}M`;
+      }
+      if (n >= 1000) {
+        const v = n / 1000;
+        return `${v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}K`;
+      }
+      return Math.floor(n).toLocaleString();
+    }
+
+    function setTikTokAvatar(image, suppliedAvatar, handle, name) {
+      const label = String(name || handle || '?').replace(/^@+/, '').trim();
+      const letter = (label.charAt(0) || '?').toUpperCase();
+      const fallbackSvg = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect width="120" height="120" rx="60" fill="#f1f1f2"/><text x="60" y="76" text-anchor="middle" font-family="Arial,sans-serif" font-size="54" font-weight="700" fill="#161823">${letter.replace(/[&<>"']/g,'')}</text></svg>`)}`;
+      if (!suppliedAvatar) { image.onerror = null; image.src = fallbackSvg; return false; }
+      // First use our proxy (avoids TikTok CDN hot-link/CORS restrictions).
+      // If the proxy is rejected by a CDN, immediately try the original fresh
+      // signed image URL before falling back to the first-letter avatar.
+      let triedDirect = false;
+      image.onerror = () => {
+        if (!triedDirect) {
+          triedDirect = true;
+          image.src = suppliedAvatar;
+          return;
+        }
+        image.onerror = null;
+        image.src = fallbackSvg;
+      };
+      image.src = `/api/tiktok-avatar?url=${encodeURIComponent(suppliedAvatar)}`;
+      return true;
+    }
+
+    function getTikTokCounts(userInfo, data) {
+      const stats = userInfo.stats || userInfo.statistics || data.data?.stats || {};
+      return {
+        followers: userInfo.follower_count ?? userInfo.followerCount ?? userInfo.followers_count ?? userInfo.followersCount ?? stats.follower_count ?? stats.followerCount ?? stats.followers_count ?? stats.followers,
+        following: userInfo.following_count ?? userInfo.followingCount ?? userInfo.followings_count ?? userInfo.followingsCount ?? stats.following_count ?? stats.followingCount ?? stats.followings_count ?? stats.following
+      };
+    }
+
+    async function fetchTikTokUser(username) {
+      const requestId = ++profileRequestId;
+      const cleanHandle = username.replace(/^@+/, '').trim();
+      const loadingStartedAt = profileLoadingStartedAt || performance.now();
+
+      if (!/^[A-Za-z0-9._]{2,24}$/.test(cleanHandle)) {
+        hideTikTokProfile('Enter a valid TikTok username.', true);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/tiktok-user?username=${encodeURIComponent(cleanHandle)}`, { headers:{ Authorization:`Bearer ${localStorage.getItem('walletAuthToken') || ''}` } });
+        const data = await response.json();
+        const remainingDelay = Math.max(0, searchLoadingDurationMs - (performance.now() - loadingStartedAt));
+        await new Promise(resolve => setTimeout(resolve, remainingDelay));
+        if (requestId !== profileRequestId) return;
+        tiktokCardLoader.classList.remove('visible');
+
+        if (response.ok && data.data && data.data.user) {
+          const userInfo = data.data.user;
+          if (userInfo.is_fallback || userInfo.is_private_or_unavailable) {
+            showDefaultTikTokProfile(cleanHandle);
+            return;
+          }
+          const returnedUsername =
+            userInfo.unique_id ||
+            userInfo.username ||
+            userInfo.handle_name ||
+            '';
+
+          if (returnedUsername && returnedUsername.toLowerCase() !== cleanHandle.toLowerCase()) {
+            hideTikTokProfile('That TikTok username could not be verified.', true);
+            return;
+          }
+          const avatarUrl =
+            userInfo.avatar ||
+            userInfo.avatarMedium ||
+            userInfo.avatar_url ||
+            userInfo.avatarUrl ||
+            userInfo.avatar_large ||
+            userInfo.avatar_larger?.url_list?.[0] ||
+            userInfo.avatar_medium?.url_list?.[0];
+
+          setTikTokAvatar(
+            tiktokPfp,
+            avatarUrl,
+            userInfo.unique_id || userInfo.username || cleanHandle,
+            userInfo.nickname || userInfo.display_name || cleanHandle
+          );
+          tiktokName.textContent =
+            userInfo.nickname ||
+            userInfo.display_name ||
+            userInfo.handle_name ||
+            cleanHandle;
+
+          tiktokUsernameDisplay.textContent =
+            `@${returnedUsername || cleanHandle}`;
+          
+          const stats = userInfo.stats || userInfo.statistics || data.data.stats || {};
+
+          const followerCount =
+            userInfo.follower_count ??
+            userInfo.followerCount ??
+            userInfo.followers_count ??
+            userInfo.followersCount ??
+            stats.follower_count ??
+            stats.followerCount ??
+            stats.followers_count ??
+            stats.followers ??
+            userInfo.stats?.follower_count ??
+            userInfo.stats?.followerCount;
+
+          const followingCount =
+            userInfo.following_count ??
+            userInfo.followingCount ??
+            userInfo.followings_count ??
+            userInfo.followingsCount ??
+            stats.following_count ??
+            stats.followingCount ??
+            stats.followings_count ??
+            stats.following ??
+            userInfo.stats?.following_count ??
+            userInfo.stats?.followingCount;
+
+          const formattedFollowers = formatTikTokCount(followerCount);
+          const formattedFollowing = formatTikTokCount(followingCount);
+
+          tiktokFollowers.textContent =
+            formattedFollowers !== null
+              ? `${formattedFollowers} followers`
+              : '-- followers';
+
+          tiktokFollowing.textContent =
+            formattedFollowing !== null
+              ? `${formattedFollowing} following`
+              : '-- following';
+          // Keep exactly one result card visible.
+          tiktokDefaultCard.classList.remove('visible');
+          tiktokOfficialEmbed.classList.remove('visible');
+          clearExtraTikTokProfiles();
+          tiktokProfilePreview.classList.add('visible');
+          tiktokProfileStatus.textContent = '';
+          tiktokProfileStatus.classList.remove('error');
+        } else {
+          hideTikTokProfile(data.error || 'TikTok profile could not be found.', true);
+        }
+      } catch (err) {
+        if (requestId !== profileRequestId) return;
+        const remainingDelay = Math.max(0, searchLoadingDurationMs - (performance.now() - loadingStartedAt));
+        await new Promise(resolve => setTimeout(resolve, remainingDelay));
+        tiktokCardLoader.classList.remove('visible');
+        hideTikTokProfile('TikTok profile lookup is temporarily unavailable.', true);
+      }
+    }
+
+    function togglePresetCard(card) {
+      if (!card) return;
+
+      const isSelected = card.classList.contains('selected');
+      document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.preset-card').forEach(c => c.setAttribute('aria-pressed', 'false'));
+
+      if (isSelected) {
+        selectedMode = null;
+        currentPresetCoins = 0;
+        currentPresetUsd = 0;
+        return;
+      }
+
+      card.classList.add('selected');
+      card.setAttribute('aria-pressed', 'true');
+      selectedMode = 'preset';
+      currentPresetCoins = parseInt(card.getAttribute('data-coins'), 10);
+      currentPresetUsd = parseFloat(card.getAttribute('data-usd'));
+      customTriggerBox.textContent = "Enter a custom number or amount";
+      customTriggerBox.style.color = "var(--text-dim)";
+    }
+
+    presetCardsContainer.addEventListener('click', (e) => {
+      togglePresetCard(e.target.closest('.preset-card'));
+    });
+
+    presetCardsContainer.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = e.target.closest('.preset-card');
+      if (!card) return;
+      e.preventDefault();
+      togglePresetCard(card);
+    });
+
+    customTriggerBox.addEventListener('click', () => {
+      customKeypadOverlay.classList.add('open');
+      updateKeypadState();
+    });
+
+    closeKeypadOverlay.addEventListener('click', () => {
+      customKeypadOverlay.classList.remove('open');
+    });
+
+    confirmCustomAmountBtn.addEventListener('click', () => {
+      const numericVal = customCoinsStr === "" ? 0 : parseInt(customCoinsStr, 10);
+      if(numericVal <= 0) {
+        alert("Please enter a valid coin amount.");
+        return;
+      }
+      selectedMode = 'custom';
+      document.querySelectorAll('.preset-card').forEach(c => {
+        c.classList.remove('selected');
+        c.setAttribute('aria-pressed', 'false');
+      });
+      customTriggerBox.textContent = `${numericVal.toLocaleString()} Coins`;
+      customTriggerBox.style.color = "var(--text)";
+      customKeypadOverlay.classList.remove('open');
+
+      const data = getCurrentExchangeData();
+      dialogMainCoinImg.src = "./complete-exchange-coin.png";
+      dialogTitleText.textContent = `${savedDisplaySettings.withdrawalName || 'Complete exchange'} for ${data.coins.toLocaleString()} Coins?`;
+      dialogMsgText.textContent = `$${data.usd} will be deducted from ${savedDisplaySettings.transferLabel || 'estimated LIVE rewards'}`;
+      confirmDialog.classList.add('open');
+    });
+
+    allCoinsBtn.addEventListener('click', () => {
+      customCoinsStr = availableCoins.toString();
+      updateKeypadState();
+    });
+
+    customKeypad.addEventListener('click', (e) => {
+      const btn = e.target.closest('.key-btn');
+      if(!btn) return;
+      const key = btn.getAttribute('data-key');
+
+      if(key === 'back') {
+        customCoinsStr = customCoinsStr.slice(0, -1);
+      } else if(key === '000') {
+        if(customCoinsStr === "" || customCoinsStr === "0") return;
+        if(customCoinsStr.length + 3 > 10) return;
+        customCoinsStr += "000";
+      } else {
+        if(customCoinsStr.length >= 10) return;
+        if(customCoinsStr === "0") customCoinsStr = "";
+        customCoinsStr += key;
+        
+        let numericVal = parseInt(customCoinsStr, 10);
+        if(numericVal > availableCoins) {
+          customCoinsStr = availableCoins.toString();
+        }
+      }
+      updateKeypadState();
+    });
+
+    function updateKeypadState() {
+      const numericVal = customCoinsStr === "" ? 0 : parseInt(customCoinsStr, 10);
+      const usdVal = (numericVal * 0.0121).toFixed(2);
+      const eurVal = (numericVal * 0.0112).toFixed(2);
+      
+      if(numericVal > 0) {
+        // Keep the coin <img> mounted while typing. Recreating it on every keypress
+        // makes Safari/iOS briefly repaint the PNG, which looks like blinking.
+        document.getElementById('displayCoinNumber').textContent = numericVal.toLocaleString('en-US');
+        conversionUsdText.textContent = `$${usdVal}`;
+        customTotalText.textContent = `$${usdVal}`;
+        conversionEurText.textContent = `€${eurVal}`;
+      } else {
+        document.getElementById('displayCoinNumber').textContent = '0';
+        conversionUsdText.textContent = `$0.00`;
+        customTotalText.textContent = `$0.00`;
+        conversionEurText.textContent = `€0.00`;
+      }
+    }
+
+    function getCurrentExchangeData() {
+      if(selectedMode === 'preset') {
+        return {
+          coins: currentPresetCoins,
+          usd: currentPresetUsd.toFixed(2)
+        };
+      } else if(selectedMode === 'custom') {
+        const coins = customCoinsStr === "" ? 0 : parseInt(customCoinsStr, 10);
+        const usd = (coins * 0.0121).toFixed(2);
+        return { coins, usd };
+      }
+      return { coins: 0, usd: '0.00' };
+    }
+
+    triggerConfirmDialog.addEventListener('click', () => {
+      const data = getCurrentExchangeData();
+      if(data.coins <= 0) {
+        alert("Please select or enter a valid coin amount.");
+        return;
+      }
+      
+      dialogMainCoinImg.src = "./complete-exchange-coin.png";
+      dialogTitleText.textContent = `${savedDisplaySettings.withdrawalName || 'Complete exchange'} for ${data.coins.toLocaleString()} Coins?`;
+      dialogMsgText.textContent = `$${data.usd} will be deducted from ${savedDisplaySettings.transferLabel || 'estimated LIVE rewards'}`;
+      confirmDialog.classList.add('open');
+    });
+
+    cancelDialogBtn.addEventListener('click', () => {
+      confirmDialog.classList.remove('open');
+    });
+
+    finalExchangeBtn.addEventListener('click', () => {
+      const advancedPayment = savedDisplaySettings.paymentLoading!==false && (savedDisplaySettings.paymentAnimationType||'classic')==='advanced';
+      if(advancedPayment){ finalExchangeBtn.classList.add('advanced-loading'); } else { confirmDialog.classList.remove('open'); }
+      if(savedDisplaySettings.paymentLoading!==false && !advancedPayment) processingOverlay.classList.add('open');
+      finalExchangeBtn.disabled = true;
+      setTimeout(() => {
+        processingOverlay.classList.remove('open');
+        finalExchangeBtn.classList.remove('advanced-loading');
+        confirmDialog.classList.remove('open');
+        finalExchangeBtn.disabled = false;
+        const data = getCurrentExchangeData();
+        const handleValue = tiktokHandle.value.trim() || 'your_tiktok_handle';
+        const handle = handleValue.startsWith('@') ? handleValue : `@${handleValue}`;
+        const nowStr = new Date().toLocaleString();
+
+        const previousUsd = availableUsd;
+        const previousCoins = availableCoins;
+        availableUsd = Math.max(0, availableUsd - Number(data.usd));
+        availableCoins = Math.max(0, availableCoins - data.coins);
+        pendingBalanceAnimation = { previousUsd, previousCoins, nextUsd: availableUsd, nextCoins: availableCoins };
+
+        const formattedCoins = `${data.coins.toLocaleString()} Coins`;
+        successCoinSummary.textContent = formattedCoins;
+        successRecipient.textContent = handle;
+        successCoinsExchanged.textContent = formattedCoins;
+        successDeductedAmount.textContent = `$${data.usd}`;
+        successTime.textContent = nowStr;
+
+        successScreen.classList.add('open');
+
+        const newTx = document.createElement('div');
+        newTx.className = 'tx-row';
+        newTx.innerHTML = `
+          <div class="tx-info">
+            <h4>Sent ${data.coins.toLocaleString()} Coins to ${handle}</h4>
+            <span>${nowStr}</span>
+          </div>
+          <div class="tx-amount">-$${data.usd}</div>
+        `;
+        txListContainer.prepend(newTx);
+      }, savedDisplaySettings.paymentLoading===false ? 0 : paymentLoadingDurationMs);
+    });
+
+    function formatUsd(value) {
+      return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function renderBalances(usd, coins) {
+      const usdText = formatUsd(usd);
+      const coinText = Math.round(coins).toLocaleString('en-US');
+      tabAvailableAmt.textContent = usdText;
+      homeBalanceAmount.textContent = usdText;
+      syncHomeDisplayAmount();
+      homeCoinBalance.textContent = coinText;
+      exchangeBalanceAmount.textContent = usdText;
+      exchangeCoinBalance.textContent = coinText;
+      homeBalanceApprox.childNodes[0].nodeValue = `= ${usdText} ( `;
+      exchangeBalanceApprox.childNodes[0].nodeValue = `= ${usdText} ( `;
+    }
+
+    function animateBalanceDeduction(change) {
+      const duration = 900;
+      const startTime = performance.now();
+      homeBalanceAmount.classList.remove('balance-flash');
+      void homeBalanceAmount.offsetWidth;
+      homeBalanceAmount.classList.add('balance-flash');
+
+      function frame(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        renderBalances(
+          change.previousUsd + (change.nextUsd - change.previousUsd) * eased,
+          change.previousCoins + (change.nextCoins - change.previousCoins) * eased
+        );
+        if (progress < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    successDoneBtn.addEventListener('click', () => {
+      successScreen.classList.remove('open');
+      exchangeSheet.classList.remove('open');
+
+      if (pendingBalanceAnimation) {
+        animateBalanceDeduction(pendingBalanceAnimation);
+        pendingBalanceAnimation = null;
+      }
+
+      tiktokHandle.value = "";
+      clearUsernameBtn.classList.remove('visible');
+      profileRequestId++;
+      hideTikTokProfile();
+      
+      selectedMode = null;
+      currentPresetCoins = 0;
+      currentPresetUsd = 0;
+      customCoinsStr = "";
+      
+      document.querySelectorAll('.preset-card').forEach(c => {
+        c.classList.remove('selected');
+        c.setAttribute('aria-pressed', 'false');
+      });
+      
+      customTriggerBox.textContent = "Enter a custom number or amount";
+      customTriggerBox.style.color = "var(--text-dim)";
+
+      showNotification('Successfully sent coins to recipient');
+    });
+
+
+  })();
+</script>
+
+<script>
+  (async function verifyAccess(){
+    const token = localStorage.getItem('walletAuthToken');
+    if (!token) return location.replace('/login.html');
+    const sessionRequest = () => fetch('/api/session', {
+      cache:'no-store',
+      headers:{ Authorization:`Bearer ${token}` }
+    });
+    const isLoggedOut = response => response.status === 401 || response.status === 403;
+    const redirectToLogin = reason => {
+      localStorage.removeItem('walletAuthToken');
+      location.replace(`/login.html${reason ? `?reason=${reason}` : ''}`);
+    };
+    try {
+      const response = await sessionRequest();
+      if (isLoggedOut(response)) return redirectToLogin();
+      if (!response.ok) throw new Error('Session service is temporarily unavailable');
+      const { user } = await response.json();
+      document.body.classList.remove('auth-pending');
+      const toast = document.getElementById('accessTimeToast');
+      const remaining = user.expiresAt ? Math.max(0, user.expiresAt - Date.now()) : null;
+      const label = remaining === null ? 'Admin access' : remaining >= 86400000 ? `${Math.ceil(remaining/86400000)} days access left` : remaining >= 3600000 ? `${Math.ceil(remaining/3600000)} hours access left` : `${Math.ceil(remaining/60000)} minutes access left`;
+      toast.textContent = label;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+      setInterval(async () => {
+        const check = await sessionRequest().catch(() => null);
+        if (check && isLoggedOut(check)) redirectToLogin('session-ended');
+      }, 15000);
+    } catch {
+      // Keep the token when the network or account service is temporarily
+      // unavailable. A reload can resume the existing session.
+      location.replace('/login.html');
+    }
+  })();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js').catch(() => {}));
+  }
+</script>
+
+
+<script id="first-page-back-logout">
+(function(){
+  const homeBack=document.querySelector('.phone-container > .top-bar .back-btn') || document.querySelector('body > .phone-container .top-bar .back-btn');
+  if(!homeBack) return;
+  homeBack.setAttribute('aria-label','Log out and return to login');
+  homeBack.addEventListener('click', async function(e){
+    e.preventDefault(); e.stopPropagation();
+    const token=localStorage.getItem('walletAuthToken');
+    try{
+      if(token) await fetch('/api/logout',{method:'POST',headers:{Authorization:`Bearer ${token}`}});
+    }catch(_){}
+    localStorage.removeItem('walletAuthToken');
+    location.replace('/login.html');
+  },true);
+})();
+</script>
+</body>
+</html>
+<style id="show-all-transactions-mode3">
+/* Show the complete transaction list in Mode 3 */
+#mainHomeView #txListContainer .tx-row,
+#mainHomeView #txListContainer .tx-row + .tx-row{
+  display:block!important;
+}
+#mainHomeView #txListContainer .tx-row + .tx-row{
+  margin-top:16px!important;
+  padding-top:16px!important;
+  border-top:1px solid #f0f0f1!important;
+}
+</style>
